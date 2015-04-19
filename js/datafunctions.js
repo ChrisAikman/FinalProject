@@ -290,27 +290,6 @@ function addData( data, graph, graph2, plottype )
 			function( d ){
 				updateHoverQuery( this, data, graph );
 			} );
-			/*.on( "mouseover",
-			function( d ){
-				var currentC = d3.select( this ).attr( "dataname" );
-				var otherlines = $( '.area' ).not( $( "." + currentC ) );
-				d3.selectAll( otherlines ).transition().style( "opacity", 0.2 );
-				$( "#hoverquery" ).css( "display", "" );
-				
-				d3.select( this ).moveToFront();
-				
-				updateHoverQuery( this, data, graph );
-			} )
-			.on( "mouseout",
-			function( d ){
-				$( "#hoverquery" ).css( "display", "none" );
-				var otherlines = $( '.area' ).not( this );
-				d3.selectAll( otherlines ).transition().style( "opacity", 0.5 );
-			} )
-			.on( "mousemove",
-			function( d ){
-				updateHoverQuery( this, data, graph );
-			} );*/
 			
 		graph2["svg"].append("path")
 			.attr( "class", classn + " " + c )

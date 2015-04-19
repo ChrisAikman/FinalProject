@@ -4,9 +4,11 @@
 	<meta charset="utf-8">
 
 	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+	<script type="text/javascript" src="js/jquery.qtip.min.js"></script>
 	<script type="text/javascript" src="js/d3.min.js"></script>
 	<script type="text/javascript" src="js/datafunctions.js"></script>
 	
+	<link type="text/css" href="css/jquery.qtip.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/style.css" rel="stylesheet" />
 	
 	<!-- Datasets -->
@@ -106,10 +108,14 @@ function generateVis()
 	function brushed()
 	{
 		graph["x"].domain( brush.empty() ? overview["x"].domain() : brush.extent() );
-		for( c in data["data"] ) {
+		for( d in curdata )
+			for( c in curdata[d]["data"] )
+				graph["svg"].select( "." + c + curdata[d]["name"] ).attr( "d", graph[curdata[d]["draw"]]( curdata[d]["data"][c], graph["x"] ) );
+		
+		/*for( c in data["data"] ) {
 			graph["svg"].select( "." + c + data["name"] ).attr( "d", graph["valuearea"]( data["data"][c], graph["x"] ) );
 			graph["svg"].select( "." + c + data2["name"] ).attr( "d", graph["valuearea"]( data2["data"][c], graph["x"] ) );
-		}
+		}*/
 		graph["svg"].select( ".event" ).attr( "d", graph["valuearea"]( [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ], graph["x"] ) )
 		graph["svg"].select( ".x.axis" ).call( graph["xAxis"] );
 	}
@@ -149,12 +155,18 @@ function fillVis()
 		
 	json = json2 = json3 = json4 = 0;
 	
-	var 
+	
 	
 	curdata = [];
 	curdata.push( data );
 	curdata.push( data2 );
-	//curdata.push( 
+	
+	/*curdata.push( {
+		"data": [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ],
+		"name": "France Something",
+		"type": "XE",
+		"draw": "valuearea"
+	} );*/
 
 	// Add the data
 	graph["svg"].append("path")
@@ -163,8 +175,8 @@ function fillVis()
 		.attr( "d", graph["valuearea"]( [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ], graph["x"] ) )
 		.attr( "clip-path", "url(#clip)" );
 		
-	addData( data, graph, overview );
-	addData( data2, graph, overview );
+	for( var d in curdata )
+		addData( curdata[d], graph, overview );
 }
 
 function fillControls()
