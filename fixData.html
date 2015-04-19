@@ -1,0 +1,125 @@
+<html>
+<head>
+	<script src="datasets/births.json"></script>
+	<script src="datasets/deathrates.json"></script>
+	<script src="datasets/deaths.json"></script>
+	<script src="datasets/ltboth.json"></script>
+	<script src="datasets/ltfemale.json"></script>
+	<script src="datasets/ltmale.json"></script>
+	<script src="datasets/populations.json"></script>
+</head>
+
+<body onload="start();">
+<script>
+	var FAVG = 0;
+	var FADD = 1;
+
+	function start()
+	{
+		var d = mergeGermany( deaths, FAVG );
+		var nd = bringOutYears( d );
+		document.write( JSON.stringify( nd ) );
+		//convertBirthsSecondStage();
+		//convertBirthsFirstStage();
+	}
+	
+	function mergeGermany( data, func )
+	{
+		var newData = {};
+	
+		newData["DEUTNP"] = [];
+		for( var x in data["DEUTE"] ) {
+			newData["DEUTNP"][x] = [];
+			for( var y in data["DEUTE"][x] )
+				if( y == 0 || y == 1 )
+					newData["DEUTNP"][x][y] = data["DEUTE"][x][y];
+				else {
+					if( func == FADD )
+						newData["DEUTNP"][x][y] = data["DEUTE"][x][y] + data["DEUTW"][x][y];
+					if( func == FAVG )
+						newData["DEUTNP"][x][y] = Math.round( ( ( data["DEUTE"][x][y] + data["DEUTW"][x][y] ) / 2.0 ) * 100000 ) / 100000;
+				}
+		}
+		
+		for( var x in data )
+			if( x != "DEUTE" && x != "DEUTW" )
+				newData[x] = data[x];
+				
+		return newData;
+	}
+	
+	function bringOutYears( data )
+	{
+		// Bring out the dates so they can be found quickly.
+		var newData = {};
+		
+		for( var x in data ) {
+			// Add assoc array for each country.
+			newData[x] = {};
+			// Loop through all data in each country.
+			for( var y in data[x] ) {
+				// Add array for each year if we don't have one.
+				if( !( data[x][y][0] in newData[x] ) )
+					newData[x][data[x][y][0]] = [];
+					
+				// Make sure the ages are correctly positioned.
+				if( data[x][y][1] != newData[x][data[x][y][0]].length )
+					alert( x + " does not have correct age at position " + data[x][y][1] + ", len = " + newData[x][data[x][y][0]].length );
+				// Copy the data.
+				var da = data[x][y].slice(0);
+				da.shift();
+				da.shift();
+				// Copy the other stuff.
+				newData[x][data[x][y][0]].push( da );
+			}
+		}
+		
+		return newData;
+	}
+	
+	// USE OUTPUT FROM FIRST STAGE FOR THIS!
+	function convertBirthsSecondStage()
+	{
+		// Bring out the dates so they can be found quickly.
+		var fixBirths = {};
+		for( var x in births ) {
+			// Add assoc array for each country.
+			fixBirths[x] = {};
+			for( var y in births[x] ) {
+				// Add array for each year.
+				fixBirths[x][births[x][y][0]] = [];
+				for( var z in births[x][y] )
+					if( z != 0 )
+						fixBirths[x][births[x][y][0]].push( births[x][y][z] );
+			}
+		}
+		
+		document.write( JSON.stringify( fixBirths ) );
+	}
+	
+	// Straight from PYTHON output.
+	function convertBirthsFirstStage()
+	{
+		var newBirths = {};
+	
+		// Add up Germany and save it in newBirths.
+		newBirths["DEUTNP"] = [];
+		for( var x in births["DEUTE"] ) {
+			newBirths["DEUTNP"][x] = [];
+			for( var y in births["DEUTE"][x] )
+				if( y == 0 )
+					newBirths["DEUTNP"][x][y] = births["DEUTE"][x][y];
+				else
+					newBirths["DEUTNP"][x][y] = births["DEUTE"][x][y] + births["DEUTW"][x][y];
+		}
+		
+		for( var x in births )
+			if( x != "DEUTE" && x != "DEUTW" )
+				newBirths[x] = births[x];
+			
+		//document.write( JSON.stringify( newBirths ) );
+	}
+</script>
+</body>
+
+</html>
