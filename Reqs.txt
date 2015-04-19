@@ -1,0 +1,15 @@
+Convert Births/DeathRates/Popluation/Deaths/LT_Both to JSON using that formatter thing
+	[x]Births
+	[x]Deaths
+	[o]Death Rates
+	[x]Population
+	[o]LT
+	[o]LT_Male
+	[o]LT_Female
+
+Country Selector
+Time Selector
+Ages Selector
+Data Selector
+Gender Selector
+Show Events

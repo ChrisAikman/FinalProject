@@ -1,0 +1,63 @@
+<html>
+<head>
+	<script src="js/bson.js"></script>
+	<script src="js/lz-string.min.js"></script>
+</head>
+
+<body>
+
+<input type='file' accept='application/octet-stream' onchange='openFile(event)'><br>
+<img id='output'>
+<script>
+  var openFile = function(event) {
+    var input = event.target;
+
+	// Blob -> ArrayBuffer
+	/*
+	var uint8ArrayNew  = null;
+	var arrayBufferNew = null;
+	var fileReader     = new FileReader();
+	fileReader.onload  = function(progressEvent) {
+		arrayBufferNew = this.result;
+		uint8ArrayNew  = new Uint8Array(arrayBufferNew);
+		
+		var BSON = bson().BSON;
+		var json = BSON.deserialize(uint8ArrayNew);
+		document.write( JSON.stringify(json) );
+	};
+	fileReader.readAsArrayBuffer( input.files[0] );*/
+	
+	// Blob -> CompressedArrayBuffer
+	var uint8ArrayNew  = null;
+	var arrayBufferNew = null;
+	var fileReader     = new FileReader();
+	fileReader.onload  = function(progressEvent) {
+		arrayBufferNew = this.result;
+		uint8ArrayNew  = new Uint8Array(arrayBufferNew);
+		
+		string = LZString.decompressFromUint8Array(uint8ArrayNew);
+		document.write( string );
+	};
+	fileReader.readAsArrayBuffer( input.files[0] );
+  };
+</script>
+
+<script>
+	function start() {
+		var BSON = bson().BSON;
+
+		// Serialize a document
+		//var data = BSON.serialize(births, true, true, false);
+		var reader = new FileReader();
+		reader.readAsArrayBuffer( "datasets/births.bson" );
+		// De serialize it again
+		var json = BSON.deserialize(data[0]);
+
+		document.write( json );
+	}
+	
+	//document.write( births );
+</script>
+</body>
+
+</html>

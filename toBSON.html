@@ -1,0 +1,65 @@
+<html>
+<head>
+	<script src="js/FileSaver.min.js"></script>
+	<script src="js/lz-string.min.js"></script>
+	<!--<script src="js/bson.js"></script>-->
+	<script src="datasets/births.json"></script>
+	<script src="datasets/deathrates.json"></script>
+	<script src="datasets/deaths.json"></script>
+	<script src="datasets/ltboth.json"></script>
+	<script src="datasets/ltfemale.json"></script>
+	<script src="datasets/ltmale.json"></script>
+	<script src="datasets/populations.json"></script>
+</head>
+
+<body onload="start();">
+<script>
+	var ext = ".jzp";
+
+	//var load = [ births, "births" + ext ];
+	//var load = [ deathrates, "deathrates" + ext ];
+	//var load = [ deaths, "deaths" + ext ];
+	//var load = [ ltboth, "ltboth" + ext ];
+	//var load = [ ltfemale, "ltfemale" + ext ];
+	//var load = [ ltmale, "ltmale" + ext ];
+	//var load = [ populations, "populations" + ext ];
+	
+	var mortdata = {
+		"births": births,
+		"deathrates": deathrates,
+		"deaths": deaths,
+		"ltboth": ltboth,
+		"ltfemale": ltfemale,
+		"ltmale": ltmale,
+		"populations": populations
+	};
+	
+	var load = [ mortdata, "mortdata" + ext ];
+	
+	//44 down to 6.8 w/ BSON serialize and compress
+	//24 down to 4.5 w/ JSON stringify and compress
+
+	function start() {
+		//var BSON = bson().BSON;
+
+		// Serialize a document
+		//var data = BSON.serialize(load[0], true, false, false);
+		// De serialize it again
+		//var doc_2 = BSON.deserialize(data);
+		
+		var data = JSON.stringify( load[0] );
+		
+		var string = "This is my compression test.";
+		alert("Size of sample is: " + data.length);
+		var compressed = LZString.compressToUint8Array(data);
+		alert("Size of compressed sample is: " + compressed.length);
+		//string = LZString.decompress(compressed);
+
+		//var blob = new Blob([data.buffer]);
+		var blob = new Blob([compressed]);
+		saveAs( blob, load[1] );
+	}
+</script>
+</body>
+
+</html>

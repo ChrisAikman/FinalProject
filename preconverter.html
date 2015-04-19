@@ -1,0 +1,34 @@
+<HTML>
+
+<HEAD>
+	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+	
+	<!-- Data -->
+	<script type="text/javascript" src="presets/BIRTHSPre.json"></script>
+</HEAD>
+
+<BODY>
+
+<div id="data1">
+</div>
+
+<script type="text/javascript">
+
+$(function () {
+		var births = {};
+		for( var i in birthspre ) {
+			if( !( birthspre[i][0] in births ) )
+				births[birthspre[i][0]] = [];
+				
+			births[birthspre[i][0]].push( birthspre[i] );
+			births[birthspre[i][0]][births[birthspre[i][0]].length-1].shift();
+		}
+		
+		document.write( JSON.stringify( births ) );
+	});
+
+</script>
+
+</BODY>
+
+</HTML>

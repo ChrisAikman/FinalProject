@@ -1,0 +1,150 @@
+<HTML>
+
+<HEAD>
+	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+	<!--[if IE]><script language="javascript" type="text/javascript" src="js/Extras/excanvas.js"></script><![endif]-->
+	<script language="javascript" type="text/javascript" src="js/jit.js"></script>
+	
+	<script language="javascript" type="text/javascript" src="js/chart.js"></script>
+	
+	<link type="text/css" href="css/base.css" rel="stylesheet" />
+	
+	<!-- Datasets -->
+	<script type="text/javascript" src="datasets/births.json"></script>
+	
+	<style>
+		body {
+			margin-top: 0px;
+			background: linear-gradient(#EEE, #CCCCD0);
+		}
+		h1 {
+			font-size: 60px;
+			margin-bottom: 10px;
+		}
+		
+		a {
+			color: #7777EE;
+			text-decoration: none;
+		}
+		
+		a:hover {
+			color: #AAAAFF;
+		}
+	</style>
+</HEAD>
+
+<!--<BODY>
+
+<div style="margin: auto; width: 904px;" align="center">
+	<div id="title" style="text-align: center;">
+		<h1 style="font-family: Century Gothic, sans-serif;">LIFETIME STATISTICS</h1>
+		<h2 style="font-family: Century Gothic, sans-serif;">Based on Data from mortality.org</h2>
+	</div>
+	<div style="font-size: 30px; font-family: Century Gothic, sans-serif;">Convert Charts to: <a href="javascript:drawCharts('line')" id="linejs">Line</a> | <a href="javascript:drawCharts('column')" id="coljs">Column</a> | <a href="javascript:drawCharts('area')" id="areajs">Area</a></div><BR>
+	<div id="chart" style="width:900px; height:900px; border: 1px solid black; background-color: #FFF;"></div><BR>
+	<div style="text-align:right;">Source: <a href="http://www.mortality.org/">Mortality.org</a></div>
+</div>
+
+<script type="text/javascript">
+
+function drawCharts( type )
+{
+}
+
+$(function () {
+	//drawCharts( 'line' );
+	init();
+	});
+
+</script>
+
+</BODY>-->
+
+<BODY>
+<div id="root" style="margin: auto; width: 904px;" align="center">
+
+	<div id="title" style="text-align: center;">
+		<h1 style="font-family: Century Gothic, sans-serif;">LIFETIME STATISTICS</h1>
+		<h2 style="font-family: Century Gothic, sans-serif;">Based on Data from mortality.org</h2>
+	</div>
+	<div style="font-size: 30px; font-family: Century Gothic, sans-serif;">Convert Charts to: <a href="javascript:drawCharts('line')" id="linejs">Line</a> | <a href="javascript:drawCharts('column')" id="coljs">Column</a> | <a href="javascript:drawCharts('area')" id="areajs">Area</a></div><BR>
+	
+	<div id="center-root">
+		<div id="infovis"></div>    
+	</div>
+	
+	<div id="chart" ></div><BR>
+	<div style="text-align:right;">Source: <a href="http://www.mortality.org/">Mortality.org</a></div>
+
+</div>
+
+<script type="text/javascript">
+
+var GENDER_MALE		= 0;
+var GENDER_FEMALE	= 1;
+var GENDER_BOTH		= 2;
+
+var json;
+
+/*function genBirths( countries, years, gender )
+{
+	var retdata = { 'label':[], 'values':[] };
+	
+	for( var country in countries )
+		retdata['values'].push( { 'label': countries[country], 'values': [] } );
+
+	for( var year = years[0]; year <= years[1]; year++ ) {
+		retdata['label'].push( year );
+		for( var country in countries ) {
+			retdata['values'][country]['values'][year-years[0]] = 0;
+			for( var data in births[countries[country]] )
+				if( year == births[countries[country]][data][0] ) {
+					if( gender == GENDER_MALE )
+						retdata['values'][country]['values'][year-years[0]] = births[countries[country]][data][2];
+					if( gender == GENDER_FEMALE )
+						retdata['values'][country]['values'][year-years[0]] = births[countries[country]][data][1];
+					if( gender == GENDER_BOTH )
+						retdata['values'][country]['values'][year-years[0]] = births[countries[country]][data][3];
+				}
+		}
+	}
+	
+	return retdata;
+}*/
+
+function genBirths( countries, years, gender )
+{
+	var retdata = { 'label':countries, 'values':[] };
+	
+	for( var year = years[0]; year <= years[1]; year++ ) {
+		retdata['values'].push( { 'label': year, 'values': [] } );
+		for( var country in countries ) {
+			retdata['values'][year-years[0]]['values'][country] = 0;
+			for( var data in births[countries[country]] )
+				if( year == births[countries[country]][data][0] ) {
+					if( gender == GENDER_MALE )
+						retdata['values'][year-years[0]]['values'][country] = births[countries[country]][data][2];
+					if( gender == GENDER_FEMALE )
+						retdata['values'][year-years[0]]['values'][country] = births[countries[country]][data][1];
+					if( gender == GENDER_BOTH )
+						retdata['values'][year-years[0]]['values'][country] = births[countries[country]][data][3];
+				}
+		}
+	}
+	
+	return retdata;
+}
+
+$(function () {
+	json = genBirths( [ "USA", "JPN" ], [ 1930, 2000 ], GENDER_BOTH );
+	
+	//document.write( JSON.stringify( json ) );
+
+	init();
+	});
+
+</script>
+
+</BODY>
+
+</HTML>
