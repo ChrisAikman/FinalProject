@@ -112,9 +112,11 @@ path.line {
 }
 
 .controlpanelcountry{
+	margin-top: 2px;
 	margin-bottom: 5px;
 	background-color: #DDD;
 	opacity: 0.8;
+	border: 1px solid gray;
 }
 
 .controlpanelcountry:hover{

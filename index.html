@@ -5,10 +5,12 @@
 
 	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
 	<script type="text/javascript" src="js/jquery.qtip.min.js"></script>
+	<script type="text/javascript" src="js/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="js/d3.min.js"></script>
 	<script type="text/javascript" src="js/datafunctions.js"></script>
 	
 	<link type="text/css" href="css/jquery.qtip.min.css" rel="stylesheet" />
+	<link type="text/css" href="css/jquery-ui.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/style.css" rel="stylesheet" />
 	
 	<!-- Datasets -->
@@ -38,7 +40,17 @@
 		<div id="filterspanel" class="controlpanel">
 			Selected Filters:
 			<div id="filterHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
-			<div id="filterlist" class="controlpanelinset" ></div>
+			<div id="filterlist" class="controlpanelinset" >
+				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
+					<span id="yearsselected"></span>
+					<div id="slider-year" style="margin:5px; margin-left: 8px; margin-right: 13px;"></div>
+				</div>
+				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
+					<span id="agesselected"></span>
+					<div id="slider-age" style="margin:5px; margin-left: 8px; margin-right: 13px;"></div>
+				</div>
+				Genders:
+			</div>
 		</div>
 		<div id="eventpanel" class="controlpanel">
 			Selected Events:
@@ -92,6 +104,8 @@ window.onresize = function( event ) {
 	fillVis();
 }
 
+var margin,	width, height, height2;
+
 var leftOffset = 70;
 var topOffset = 10;
 var graph;
@@ -105,10 +119,10 @@ function generateVis()
 	var visheight = $( document ).height();
 	var viswidth = $( window ).width() - 200;
 	
-	var margin = {top: topOffset, right: 30, bottom: 30, left: leftOffset},
-		width = viswidth - margin.left - margin.right - 9,
-		height = visheight * .8 - margin.top - margin.bottom - 6,
-		height2 = visheight * .2 - margin.top - margin.bottom - 9;
+	margin = {top: topOffset, right: 30, bottom: 30, left: leftOffset};
+	width = viswidth - margin.left - margin.right - 9;
+	height = visheight * .8 - margin.top - margin.bottom - 6;
+	height2 = visheight * .2 - margin.top - margin.bottom - 9;
 		
 	graph = addGraph( "#vis", margin, width, height, [0, width], [height, 0], [1800,2020], [0, 2400000], 20, 20 );
 	overview = addGraph( "#overview", margin, width, height2, [0,width], [height2, 0], [1800,2020], [0, 2400000], 20, 0 );
@@ -150,35 +164,63 @@ function fillVis()
 	var selectedCountries = $('#countrylist input:checkbox:checked').map(function() {
 		return this.value;
 	}).get();
+	
+	var view = $( "#viewlist input[type='radio']:checked" ).val();
+	var years = $( "#slider-year" ).slider( "option", "values" );
 
-	// Gather the data.
-	var json = genBirths( selectedCountries, [ 1800, 2020 ], GENDER_MALE );
-	var json2 = genBirths( selectedCountries, [ 1800, 2020 ], GENDER_FEMALE );
-	
-	var json3 = genPopDeath( selectedCountries, [ 1800, 2020 ], GENDER_MALE, deaths );
-	var json4 = genPopDeath( selectedCountries, [ 1800, 2020 ], GENDER_FEMALE, deaths );
-	
-	var data = {};
-	data["data"] = {};
-	data["name"] = "births";
-	data["type"] = "BB";
-	data["draw"] = "valuearea";
-	for( var c in json["data"] )
-		data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
-		
-	var data2 = {};
-	data2["data"] = {};
-	data2["name"] = "deaths";
-	data2["type"] = "DB";
-	data2["draw"] = "valuearea";
-	for( var c in json3["data"] )
-		data2["data"][c] = areaCombine( json3["data"][c], json4["data"][c], 0, 1 );
-		
-	json = json2 = json3 = json4 = 0;
-	
 	curdata = [];
-	curdata.push( data );
-	curdata.push( data2 );
+	
+	// Gather the data.
+	if( view == VIEW_BIRTHS || view == VIEW_BANDD ) {
+		var json = genBirths( selectedCountries, years, GENDER_MALE );
+		var json2 = genBirths( selectedCountries, years, GENDER_FEMALE );
+		
+		var data = {};
+		data["data"] = {};
+		data["name"] = "births";
+		data["type"] = "BB";
+		data["draw"] = "valuearea";
+		for( var c in json["data"] )
+			data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
+			
+		json = json2 = 0;
+			
+		curdata.push( data );
+	}
+	
+	if( view == VIEW_DEATHS || view == VIEW_BANDD ) {
+		var json = genPopDeath( selectedCountries, years, GENDER_MALE, deaths );
+		var json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, deaths );
+		
+		var data = {};
+		data["data"] = {};
+		data["name"] = "deaths";
+		data["type"] = "DB";
+		data["draw"] = "valuearea";
+		for( var c in json["data"] )
+			data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
+			
+		json = json2 = 0;
+			
+		curdata.push( data );
+	}
+	
+	if( view == VIEW_POPULATION ) {
+		var json = genPopDeath( selectedCountries, years, GENDER_MALE, populations );
+		var json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, populations );
+		
+		var data = {};
+		data["data"] = {};
+		data["name"] = "deaths";
+		data["type"] = "PB";
+		data["draw"] = "valuearea";
+		for( var c in json["data"] )
+			data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
+			
+		json = json2 = 0;
+			
+		curdata.push( data );
+	}
 	
 	/*curdata.push( {
 		"data": [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ],
@@ -194,8 +236,44 @@ function fillVis()
 		.attr( "d", graph["valuearea"]( [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ], graph["x"] ) )
 		.attr( "clip-path", "url(#clip)" );
 		
+	// Update the axis.
+	var xtent = [], ytent = [];
+	for( var x in curdata )
+		for( var y in curdata[x]["data"] ) {
+			xtent.push( d3.extent( curdata[x]["data"][y], function(d) { return d[0]; } ) );
+			ytent.push( d3.extent( curdata[x]["data"][y], function(d) { if( 2 in d ) return Math.max( d[1], d[2] ); else return d[1]; } ) );
+		}
+	
+	var minx = d3.min( xtent, function(d) { return d[0]; } );
+	var maxx = d3.max( xtent, function(d) { return d[1]; } );
+	var maxy = d3.max( ytent, function(d) { return d[1]; } );
+	
+	graph["x"].domain( [ minx, maxx ] );
+	graph["y"].domain( [ 0, maxy ] );
+	
+	overview["x"].domain( [ minx, maxx ] );
+	overview["y"].domain( [ 0, maxy ] );
+	
+	graph["svg"].selectAll("g.x.axis").call( graph["xAxis"] );
+	graph["svg"].selectAll("g.y.axis").call( graph["yAxis"] );
+	overview["svg"].selectAll("g.x.axis").call( overview["xAxis"] );
+		
 	for( var d in curdata )
 		addData( curdata[d], graph, overview );
+}
+
+function fillEvents()
+{
+	// CHECK AGAINST YEARS AND COUNTRIES
+	for( var e in events ) {
+		$( "#eventlist" ).append( "<div id=\"eventselectdiv" + e + "\" class=\"controlpanelcountry\"></div>" );
+		$( "#eventselectdiv" + e ).append( "<input type=\"checkbox\" id=\"eventselect" + e + "\" name=\"eventselect\" value=\"" + e + "\"/>" );
+		
+		$( "#eventselectdiv" + e ).append( "<label id=\"countrylabel_" + e + "\" for=\"countryselect_" + e + "\">" + events[e][0] + "</label>" );
+		$( "#eventselectdiv" + e ).append( "<div style=\"clear: both;\"></div>" );
+		
+		$( "#eventselectdiv" + e ).qtip( { content: { text: "THIS WILL CONTAIN INFO ON THE EVENT." }, style: { classes: "qtip-dark" }, position: { my: 'bottom center', at: 'top center' }, show: { delay: 0 } } )
+	}
 }
 
 function fillControls()
@@ -210,8 +288,54 @@ function fillControls()
 		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + Colors[c] + "; color: " + Colors[c] + ";\"></div>" );
 		$( "#countryselectdiv_" + c ).append( "<div style=\"clear: both;\"></div>" );
 	}
+		
+	fillEvents();
 	
+	for( var v in views ) {
+		$( "#viewlist" ).append( "<div id=\"viewselectdiv" + v + "\" class=\"controlpanelcountry\"></div>" );
+		$( "#viewselectdiv" + v ).append( "<input type=\"radio\" id=\"viewselect_" + v + "\" name=\"viewselect\" value=\"" + v + "\" "+ views[v][1] +" />" );
+		
+		$( "#viewselectdiv" + v ).append( "<label id=\"viewlabel_" + v + "\" for=\"viewselect_" + v + "\">" + views[v][0] + "</label>" );
+		$( "#viewselectdiv" + v ).append( "<div style=\"clear: both;\"></div>" );
+	}
+	
+	$( "#yearsselected" ).html( "Years [1800-2010]:" );
+	$( "#slider-year" ).slider({
+      range: true,
+      min: 1800,
+      max: 2010,
+      values: [ 1800, 2010 ],
+      slide: function( event, ui ) {
+		$( "#yearsselected" ).html( "Years [" + ui.values[0] + "-" + ui.values[1] + "]:" );
+      }
+    });
+	
+	$( "#agesselected" ).html( "Ages [0-110+]:" );
+	$( "#slider-age" ).slider({
+      range: true,
+      min: 0,
+      max: 110,
+      values: [ 0, 110 ],
+      slide: function( event, ui ) {
+		$( "#agesselected" ).html( ( "Ages [" + ui.values[0] + "-" + ui.values[1] + "]:" ).replace( "110", "110+" ) );
+      }
+    });
+	
+	for( var g in genders ) {
+		$( "#filterlist" ).append( "<div id=\"genderselectdiv" + genders[g][1] + "\" class=\"controlpanelcountry\"></div>" );
+		$( "#genderselectdiv" + genders[g][1] ).append( "<input type=\"checkbox\" id=\"genderselect" + genders[g][1] + "\" name=\"genderselect\" value=\"" + genders[g][1] + "\" "+ genders[g][2] +" />" );
+		
+		$( "#genderselectdiv" + genders[g][1] ).append( "<label id=\"genderlabel_" + genders[g][1] + "\" for=\"genderselect_" + genders[g][1] + "\">" + genders[g][0] + "</label>" );
+		$( "#genderselectdiv" + genders[g][1] ).append( "<div style=\"clear: both;\"></div>" );
+	}
+	
+	// Add events.
 	$('#countrylist input:checkbox').change(
+		function(){
+			fillVis();
+		} );
+		
+	$('#viewlist input:radio').change(
 		function(){
 			fillVis();
 		} );

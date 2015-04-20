@@ -13,7 +13,8 @@ var datasets = [
 	[ "datasets/deathrates.json", "DEATH RATES" ],
 	[ "datasets/ltboth.json", "LIFETIME EXPECTANCIES" ],
 	[ "datasets/ltfemale.json", "MALE LIFETIME EXPECTANCIES" ],
-	[ "datasets/ltmale.json", "FEMALE LIFETIME EXPECTANCIES" ]
+	[ "datasets/ltmale.json", "FEMALE LIFETIME EXPECTANCIES" ],
+	[ "datasets/events.json", "EVENTS" ]
 	];
 
 var Colors = {
@@ -38,8 +39,28 @@ var countries = {
 
 var dataName = {
 	"D": "Deaths",
-	"B": "Births"
+	"B": "Births",
+	"P": "Population"
 };
+
+var genders = [
+	[ "Males", "m", "" ],
+	[ "Females", "f", "" ],
+	[ "Total", "t", "" ],
+	[ "Both", "b", "checked" ]
+];
+
+var VIEW_BIRTHS		= 0;
+var VIEW_DEATHS		= 1;
+var VIEW_POPULATION	= 2;
+var VIEW_BANDD		= 3;
+
+var views = [
+	[ "Births", "" ],
+	[ "Deaths", "" ],
+	[ "Population", "" ],
+	[ "Births and Deaths", "checked" ]
+];
 
 // Bisector for hover queries
 bisectData = d3.bisector( function(d) { return d[0]; } ).left;
