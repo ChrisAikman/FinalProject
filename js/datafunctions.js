@@ -71,7 +71,6 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-// Generates a data array of the following format: { "Country1": [ [year,count] ], "Country2": [ [year,count] ] }
 function genBirths( countries, years, gender )
 {
 	var retdata = {};
@@ -79,11 +78,20 @@ function genBirths( countries, years, gender )
 	
 	// Gather the data.
 	for( var country in countries ) {
-		retdata["data"][countries[country]] = [];
+		retdata["data"][countries[country]] = { "data":[], "err":[] };
+		
+		retdata["data"][countries[country]]["data"].push( [] );
 		
 		for( var year = years[0]; year <= years[1]; year++ )
 			if( ""+year in births[countries[country]] )
-				retdata["data"][countries[country]].push( [ year, births[countries[country]][year][gender] ] );
+				retdata["data"][countries[country]]["data"][0].push( [ year, births[countries[country]][year][gender] ] );
+			else
+				retdata["data"][countries[country]]["data"][0].push( [ year, 0 ] );
+				
+		while( retdata["data"][countries[country]]["data"][0][0][1] == 0 )
+			retdata["data"][countries[country]]["data"][0].shift();
+		while( retdata["data"][countries[country]]["data"][0][retdata["data"][countries[country]]["data"][0].length-1][1] == 0 )
+			retdata["data"][countries[country]]["data"][0].pop();
 	}
 	
 	return retdata;
@@ -95,7 +103,9 @@ function genPopDeath( countries, years, gender, dat )
 	retdata["data"] = {};
 	
 	for( var country in countries ) {
-		retdata["data"][countries[country]] = [];
+		retdata["data"][countries[country]] = { "data":[], "err":[] };
+		
+		retdata["data"][countries[country]]["data"].push( [] );
 		
 		for( var year = years[0]; year <= years[1]; year++ ) {
 			if( ""+year in dat[countries[country]] ) {
@@ -109,7 +119,7 @@ function genPopDeath( countries, years, gender, dat )
 						totalPop += ( dat[countries[country]][year][age][0] + dat[countries[country]][year][age][1] );
 				}
 				
-				retdata["data"][countries[country]].push( [ year, totalPop ] );
+				retdata["data"][countries[country]]["data"][0].push( [ year, totalPop ] );
 			}
 		}
 	}
@@ -163,12 +173,25 @@ function genDRData( countries, years, gender, ages, dat )
 	return retdata;
 }
 
-function areaCombine( data1, data2, key, combine )
+function areaCombineS( data1, data2, key, combine )
 {
 	var newData = [];
 
 	for( var x in data1 )
 		newData.push( [ data1[x][key], data1[x][combine], data2[x][combine] ] );
+		
+	return newData;
+}
+
+function areaCombine( data1, data2, key, combine )
+{
+	var newData = { "data":[], "err":[] };
+	
+	for( var d in data1["data"] )
+		newData["data"].push( areaCombineS( data1["data"][d], data2["data"][d], key, combine ) );
+		
+	for( var e in data1["err"] )
+		newData["err"].push( areaCombineS( data1["err"][e], data2["err"][e], key, combine ) );
 		
 	return newData;
 }
@@ -256,7 +279,7 @@ function onMouseOut( obj ){
 	d3.selectAll( otherlines ).transition().style( "opacity", datanormal );
 }
 
-function addData( data, graph, graph2, plottype )
+function addData( data, graph, graph2 )
 {
 	var classn = "";
 	var pathtype = "";
@@ -269,33 +292,35 @@ function addData( data, graph, graph2, plottype )
 		pathtype = "fill"
 	}
 
-	for( var c in data["data"] ) {
-		graph["svg"].append("path")
-			.attr( "class", classn + " " + c + " " + c + data["name"] )
-			.style( pathtype, Colors[c] )
-			.attr( "d", graph[data["draw"]]( data["data"][c], graph["x"] ) )
-			.attr( "dataname", c )
-			.attr( "datatype", data["type"] )
-			.attr( "clip-path", "url(#clip)" )
-			.on( "mouseover",
-			function( d ){
-				onMouseOver( this, data, graph );
-			} )
-			.on( "mouseout",
-			function( d ){
-				onMouseOut( this );
-			} )
-			.on( "mousemove",
-			function( d ){
-				updateHoverQuery( this, data, graph );
-			} );
-			
-		graph2["svg"].append("path")
-			.attr( "class", classn + " " + c )
-			.style( pathtype, Colors[c] )
-			.attr( "d", graph2[data["draw"]]( data["data"][c], graph2["x"] ) )
-			.attr( "dataname", c );
-	}
+	for( var c in data["data"] )
+		for( var nd in data["data"][c]["data"] ) {
+			graph["svg"].append("path")
+				.attr( "class", classn + " " + c + " " + c + data["name"] )
+				.style( pathtype, Colors[c] )
+				.attr( "d", graph[data["draw"]]( data["data"][c]["data"][nd], graph["x"] ) )
+				.attr( "dataname", c )
+				.attr( "datanum", nd )
+				.attr( "datatype", data["type"] )
+				.attr( "clip-path", "url(#clip)" )
+				.on( "mouseover",
+				function( d ){
+					onMouseOver( this, data, graph );
+				} )
+				.on( "mouseout",
+				function( d ){
+					onMouseOut( this );
+				} )
+				.on( "mousemove",
+				function( d ){
+					updateHoverQuery( this, data, graph );
+				} );
+				
+			graph2["svg"].append("path")
+				.attr( "class", classn + " " + c )
+				.style( pathtype, Colors[c] )
+				.attr( "d", graph2[data["draw"]]( data["data"][c]["data"][nd], graph2["x"] ) )
+				.attr( "dataname", c );
+		}
 }
 
 function addClip( graph, width, height )

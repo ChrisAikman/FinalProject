@@ -138,10 +138,6 @@ function generateVis()
 			for( c in curdata[d]["data"] )
 				graph["svg"].select( "." + c + curdata[d]["name"] ).attr( "d", graph[curdata[d]["draw"]]( curdata[d]["data"][c], graph["x"] ) );
 		
-		/*for( c in data["data"] ) {
-			graph["svg"].select( "." + c + data["name"] ).attr( "d", graph["valuearea"]( data["data"][c], graph["x"] ) );
-			graph["svg"].select( "." + c + data2["name"] ).attr( "d", graph["valuearea"]( data2["data"][c], graph["x"] ) );
-		}*/
 		graph["svg"].select( ".event" ).attr( "d", graph["valuearea"]( [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ], graph["x"] ) )
 		graph["svg"].select( ".x.axis" ).call( graph["xAxis"] );
 	}
@@ -230,10 +226,11 @@ function fillVis()
 	// Update the axis.
 	var xtent = [], ytent = [];
 	for( var x in curdata )
-		for( var y in curdata[x]["data"] ) {
-			xtent.push( d3.extent( curdata[x]["data"][y], function(d) { return d[0]; } ) );
-			ytent.push( d3.extent( curdata[x]["data"][y], function(d) { if( 2 in d ) return Math.max( d[1], d[2] ); else return d[1]; } ) );
-		}
+		for( var y in curdata[x]["data"] ) 
+			for( var z in curdata[x]["data"][y]["data"] ) {
+				xtent.push( d3.extent( curdata[x]["data"][y]["data"][z], function(d) { return d[0]; } ) );
+				ytent.push( d3.extent( curdata[x]["data"][y]["data"][z], function(d) { if( 2 in d ) return Math.max( d[1], d[2] ); else return d[1]; } ) );
+			}
 	
 	var minx = d3.min( xtent, function(d) { return d[0]; } );
 	var maxx = d3.max( xtent, function(d) { return d[1]; } );

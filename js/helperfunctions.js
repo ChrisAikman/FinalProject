@@ -81,9 +81,10 @@ function updateHoverQuery( sel, da, graph )
 	$( "#hoverquery" ).css( "top", ""+top );
 	$( "#countryname" ).html( countries[ d3.select( sel ).attr( "dataname" ) ] );
 	var type = d3.select( sel ).attr( "datatype" );
+	var dnum = d3.select( sel ).attr( "datanum" );
 	$( "#hqimg" ).attr( "src", "css/images/flag_" + d3.select( sel ).attr( "dataname" ) + ".png" );
 	
-	var dat = da["data"][d3.select( sel ).attr( "dataname" )];
+	var dat = da["data"][d3.select( sel ).attr( "dataname" )]["data"][dnum];
 	var x0 = graph["x"].invert( d3.mouse(sel)[0] );
 	var i = bisectData( dat, x0 );
 	var d0 = dat[i - 1];
