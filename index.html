@@ -12,36 +12,38 @@
 	<link type="text/css" href="css/style.css" rel="stylesheet" />
 	
 	<!-- Datasets -->
-	<script type="text/javascript" src="datasets/births.json"></script>
+	<!--<script type="text/javascript" src="datasets/births.json"></script>
 	<script type="text/javascript" src="datasets/populations.json"></script>
 	<script type="text/javascript" src="datasets/deaths.json"></script>
 	<script type="text/javascript" src="datasets/deathrates.json"></script>
 	<script type="text/javascript" src="datasets/ltboth.json"></script>
 	<script type="text/javascript" src="datasets/ltfemale.json"></script>
-	<script type="text/javascript" src="datasets/ltmale.json"></script>
+	<script type="text/javascript" src="datasets/ltmale.json"></script>-->
 </HEAD>
 
 <BODY>
 <div id="root" style="margin: auto; width: 100%;" align="center">
-	<div id="title">
-		<h1 style="font-family: Century Gothic, sans-serif;">EFFECTS OF HISTORIC EVENTS ON LIFE AND MORTALITY</h1>
-		<h2 style="font-family: Century Gothic, sans-serif;">Based on Data from <a href="http://mortality.org">The Human Mortality Database</a></h2>
-	</div>
 	<!--<div style="font-size: 30px; font-family: Century Gothic, sans-serif;">Convert Charts to: <a href="javascript:drawCharts('line')" id="linejs">Line</a> | <a href="javascript:drawCharts('column')" id="coljs">Column</a> | <a href="javascript:drawCharts('area')" id="areajs">Area</a></div><BR>-->
 	<div id="controlpanel" style="float:left; width: 200px;">
 		<div id="countrypanel" class="controlpanel">
 			Selected Countries:
-			<div id="countrylist" class="controlpanelinset" >
-			</div>
+			<div id="countryHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
+			<div id="countrylist" class="controlpanelinset" ></div>
 		</div>
-		<div id="yearpanel" class="controlpanel">
-			HI
+		<div id="viewpanel" class="controlpanel">
+			Selected View:
+			<div id="viewHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
+			<div id="viewlist" class="controlpanelinset" ></div>
 		</div>
-		<div id="agepanel" class="controlpanel">
-			HI
+		<div id="filterspanel" class="controlpanel">
+			Selected Filters:
+			<div id="filterHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
+			<div id="filterlist" class="controlpanelinset" ></div>
 		</div>
 		<div id="eventpanel" class="controlpanel">
-			HI
+			Selected Events:
+			<div id="eventHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
+			<div id="eventlist" class="controlpanelinset" ></div>
 		</div>
 	</div>
 	<div id="center-root" style="float:left;">
@@ -51,17 +53,35 @@
 	<div style="clear: both;" ></div>
 </div>
 <div id="hoverquery" style="position: absolute; display: none;">
-		<img width="20px" id="hqimg" src="#" /><strong id="countryname">Country</strong>
-		<div style="padding-top: 2px;">
-			<div id="year" style="float: left; padding-left: 5px; font-size: 1.8em;">
-				YEAR
-			</div>
-			<div id="data" style="float: left; padding-left: 5px; text-align: left;">
-				Data
-			</div>
-			<div style="clear: both;"></div>
+	<img width="20px" id="hqimg" src="#" /><strong id="countryname">Country</strong>
+	<div style="padding-top: 2px;">
+		<div id="year" style="float: left; padding-left: 5px; font-size: 1.8em;">
+			YEAR
 		</div>
-		<img class="callout" src="css/images/tooltippoint.png" />
+		<div id="data" style="float: left; padding-left: 5px; text-align: left;">
+			Data
+		</div>
+		<div style="clear: both;"></div>
+	</div>
+	<img class="callout" src="css/images/tooltippoint.png" />
+</div>
+
+<div id="fadebox"></div>
+
+<!-- Intro box for the vis. -->
+<div id="introbox">
+	<div id="title">
+		<h1 style="font-family: Century Gothic, sans-serif;">EFFECTS OF HISTORIC EVENTS ON LIFE AND MORTALITY</h1>
+		<h2 style="font-family: Century Gothic, sans-serif;">Based on Data from <a href="http://mortality.org">The Human Mortality Database</a></h2>
+	</div>
+	<img style="margin-top: 10px; margin-left: 15px; margin-right: 15px; float: right; border: 1px solid black; width: 300px;" src="css/images/VisThumb.png"></img>
+	<p>
+		Human mortality is a topic that has been of interest throughout history. Since the beginning of the scientific age, great efforts have been made to extend the average lifespan and reduce risk of death. A major contributing factor to changes in birth and death rates is historic events. Wars, diseases and scientific breakthroughs have all contributed to changes in population.  The goal of this project is to use past mortality and population data to make connections between lifespan, population growth and historical events.
+	</p>
+	<div id="introloading">LOADING</div>
+	<BR><BR>
+	<div class="introhelp">Hover over the <img id="helpIcon" src="css/images/help.png"/> buttons to receive help at any time.</div>
+	
 </div>
 
 <script type="text/javascript">
@@ -77,17 +97,18 @@ var topOffset = 10;
 var graph;
 var overview;
 var curdata;
+var loadScriptOn = 0;
 
 function generateVis()
 {
 	// Set the dimensions of the canvas / graph
-	var visheight = $( document ).height() - $( "#title" ).height();
+	var visheight = $( document ).height();
 	var viswidth = $( window ).width() - 200;
 	
 	var margin = {top: topOffset, right: 30, bottom: 30, left: leftOffset},
-		width = viswidth - margin.left - margin.right,
-		height = visheight * .8 - margin.top - margin.bottom,
-		height2 = visheight * .2 - margin.top - margin.bottom;
+		width = viswidth - margin.left - margin.right - 9,
+		height = visheight * .8 - margin.top - margin.bottom - 6,
+		height2 = visheight * .2 - margin.top - margin.bottom - 9;
 		
 	graph = addGraph( "#vis", margin, width, height, [0, width], [height, 0], [1800,2020], [0, 2400000], 20, 20 );
 	overview = addGraph( "#overview", margin, width, height2, [0,width], [height2, 0], [1800,2020], [0, 2400000], 20, 0 );
@@ -155,8 +176,6 @@ function fillVis()
 		
 	json = json2 = json3 = json4 = 0;
 	
-	
-	
 	curdata = [];
 	curdata.push( data );
 	curdata.push( data2 );
@@ -188,20 +207,82 @@ function fillControls()
 		var cw = $( "#countryselect_" + c ).width();
 		
 		$( "#countryselectdiv_" + c ).append( "<label id=\"countrylabel_" + c + "\" for=\"countryselect_" + c + "\"><img id=\"countryimage_" + c + "\" height=\"" + cw + "px\" src=\"css/images/flag_" + c + ".png\" />" + countries[c] + "</label>" );
-		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + Colors[c] + "; color: " + Colors[c] + ";\">x</div>" );
+		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + Colors[c] + "; color: " + Colors[c] + ";\"></div>" );
 		$( "#countryselectdiv_" + c ).append( "<div style=\"clear: both;\"></div>" );
 	}
 	
-	$('#countrylist input:checkbox').change (
+	$('#countrylist input:checkbox').change(
 		function(){
 			fillVis();
 		} );
 }
 
+function addHelp()
+{
+	var helps = [
+		[ "#countryHelp",		"Select the countries to display data for." ],
+		[ "#viewHelp",			"Select which view to show." ],
+		[ "#filterHelp",		"Select the specific filters to apply to the data." ],
+		[ "#eventHelp",			"Select the events to display data for." ],
+		[ "#helpIcon",			"Help will popup in these tooltips!" ]
+	];
+	
+	for( var h in helps )
+		$(helps[h][0]).qtip( { content: { text: helps[h][1] }, style: { classes: "qtip-dark" }, position: { my: 'bottom center', at: 'top center' }, show: { delay: 0 } } )
+}
+
+function removeIntroBox()
+{
+	$( "#introbox" ).animate({
+		opacity: 0.0,
+		}, 500, function() {
+			$( "#introbox" ).html( "" );
+	});
+	
+	$( "#fadebox" ).animate({
+		opacity: 0.0,
+		}, 500, function() {
+			$( "#fadebox" ).css( "display", "none" );
+	});
+}
+
+function loadScripts()
+{
+	$.getScript( datasets[loadScriptOn][0], function( data, textStatus, jqxhr ) {
+		$( "#introloading" ).html( "LOADING " + datasets[loadScriptOn][1] + "..." );
+		loadScriptOn++;
+		
+		if( loadScriptOn < datasets.length )
+			loadScripts();
+		else {
+			$( "#introloading" ).html( "<div class=\"loadingbutton\" onclick=\"removeIntroBox();\">LOADING COMPLETE CLICK TO CONTINUE</div>" );
+			fillControls();
+			generateVis();
+			fillVis();
+		}
+	});
+}
+
+function introBox()
+{
+	$( "body" ).height( $( document ).height() );
+	$( "#fadebox" ).width( $( document ).width() );
+	$( "#fadebox" ).height( $( document ).height() );
+
+	var hWidth = $( document ).width() * .5;
+	var hHeight = $( document ).height() * .5;
+
+	$( "#introbox" ).width( hWidth );
+	
+	$( "#introbox" ).css( "left", hWidth - hWidth * .5 );
+	$( "#introbox" ).css( "top", hHeight - $( "#introbox" ).height() * .5 );
+	
+	loadScripts();
+}
+
 $(function () {
-	generateVis();
-	fillControls();
-	fillVis();
+	introBox();
+	addHelp();
 });
 </script>
 

@@ -5,6 +5,17 @@ var GENDER_MALE		= 1;
 var GENDER_FEMALE	= 0;
 var GENDER_BOTH		= 2;
 
+// Datasets
+var datasets = [
+	[ "datasets/births.json", "BIRTHS" ],
+	[ "datasets/populations.json", "POPULATIONS" ],
+	[ "datasets/deaths.json", "DEATHS" ],
+	[ "datasets/deathrates.json", "DEATH RATES" ],
+	[ "datasets/ltboth.json", "LIFETIME EXPECTANCIES" ],
+	[ "datasets/ltfemale.json", "MALE LIFETIME EXPECTANCIES" ],
+	[ "datasets/ltmale.json", "FEMALE LIFETIME EXPECTANCIES" ]
+	];
+
 var Colors = {
 	"USA": "blue",
 	"JPN": "red",
