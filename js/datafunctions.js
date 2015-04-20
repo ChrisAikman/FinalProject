@@ -71,39 +71,6 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-// Updates the hover query when something is moused over
-function updateHoverQuery( sel, da, graph )
-{
-	var left = d3.mouse( sel )[0] + leftOffset + $( "#vis" ).position().left - $( "#hoverquery" ).width() / 2;
-	var top = d3.mouse( sel )[1] + topOffset + $( "#vis" ).position().top - $( "#hoverquery" ).height() - 13;
-	$( "#hoverquery" ).css( "left", ""+left );
-	$( "#hoverquery" ).css( "top", ""+top );
-	$( "#countryname" ).html( countries[ d3.select( sel ).attr( "dataname" ) ] );
-	var type = d3.select( sel ).attr( "datatype" );
-	$( "#hqimg" ).attr( "src", "css/images/flag_" + d3.select( sel ).attr( "dataname" ) + ".png" );
-	
-	var dat = da["data"][d3.select( sel ).attr( "dataname" )];
-	var x0 = graph["x"].invert( d3.mouse(sel)[0] );
-	var i = bisectData( dat, x0 );
-	var d0 = dat[i - 1];
-	var d1 = dat[i];
-	var d = x0 - d0[0] > d1[0] - x0 ? d1 : d0;
-	
-	$( "#year" ).html( d[0] );
-	if( type[1] == "M" )
-		$( "#data" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
-	else if( type[1] == "F" )
-		$( "#data" ).html( "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
-	else if( type[1] == "B" )
-		$( "#data" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) + "<BR>" + "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[2] ) ) );
-}
-
-function addCommas( val ){
-	while( /(\d+)(\d{3})/.test( val.toString() ) )
-		val = val.toString().replace( /(\d+)(\d{3})/, '$1'+','+'$2' );
-	return val;
-  }
-
 // Generates a data array of the following format: { "Country1": [ [year,count] ], "Country2": [ [year,count] ] }
 function genBirths( countries, years, gender )
 {

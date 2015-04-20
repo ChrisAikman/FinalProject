@@ -7,25 +7,16 @@
 	<script type="text/javascript" src="js/jquery.qtip.min.js"></script>
 	<script type="text/javascript" src="js/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="js/d3.min.js"></script>
+	<script type="text/javascript" src="js/helperfunctions.js"></script>
 	<script type="text/javascript" src="js/datafunctions.js"></script>
 	
 	<link type="text/css" href="css/jquery.qtip.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/jquery-ui.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/style.css" rel="stylesheet" />
-	
-	<!-- Datasets -->
-	<!--<script type="text/javascript" src="datasets/births.json"></script>
-	<script type="text/javascript" src="datasets/populations.json"></script>
-	<script type="text/javascript" src="datasets/deaths.json"></script>
-	<script type="text/javascript" src="datasets/deathrates.json"></script>
-	<script type="text/javascript" src="datasets/ltboth.json"></script>
-	<script type="text/javascript" src="datasets/ltfemale.json"></script>
-	<script type="text/javascript" src="datasets/ltmale.json"></script>-->
 </HEAD>
 
 <BODY>
 <div id="root" style="margin: auto; width: 100%;" align="center">
-	<!--<div style="font-size: 30px; font-family: Century Gothic, sans-serif;">Convert Charts to: <a href="javascript:drawCharts('line')" id="linejs">Line</a> | <a href="javascript:drawCharts('column')" id="coljs">Column</a> | <a href="javascript:drawCharts('area')" id="areajs">Area</a></div><BR>-->
 	<div id="controlpanel" style="float:left; width: 200px;">
 		<div id="countrypanel" class="controlpanel">
 			Selected Countries:
@@ -90,7 +81,7 @@
 	<p>
 		Human mortality is a topic that has been of interest throughout history. Since the beginning of the scientific age, great efforts have been made to extend the average lifespan and reduce risk of death. A major contributing factor to changes in birth and death rates is historic events. Wars, diseases and scientific breakthroughs have all contributed to changes in population.  The goal of this project is to use past mortality and population data to make connections between lifespan, population growth and historical events.
 	</p>
-	<div id="introloading">LOADING</div>
+	<div id="introloading">LOADING...</div>
 	<BR><BR>
 	<div class="introhelp">Hover over the <img id="helpIcon" src="css/images/help.png"/> buttons to receive help at any time.</div>
 	
@@ -260,148 +251,6 @@ function fillVis()
 		
 	for( var d in curdata )
 		addData( curdata[d], graph, overview );
-}
-
-function fillEvents()
-{
-	// CHECK AGAINST YEARS AND COUNTRIES
-	for( var e in events ) {
-		$( "#eventlist" ).append( "<div id=\"eventselectdiv" + e + "\" class=\"controlpanelcountry\"></div>" );
-		$( "#eventselectdiv" + e ).append( "<input type=\"checkbox\" id=\"eventselect" + e + "\" name=\"eventselect\" value=\"" + e + "\"/>" );
-		
-		$( "#eventselectdiv" + e ).append( "<label id=\"countrylabel_" + e + "\" for=\"countryselect_" + e + "\">" + events[e][0] + "</label>" );
-		$( "#eventselectdiv" + e ).append( "<div style=\"clear: both;\"></div>" );
-		
-		$( "#eventselectdiv" + e ).qtip( { content: { text: "THIS WILL CONTAIN INFO ON THE EVENT." }, style: { classes: "qtip-dark" }, position: { my: 'bottom center', at: 'top center' }, show: { delay: 0 } } )
-	}
-}
-
-function fillControls()
-{
-	for( var c in births ) {
-		$( "#countrylist" ).append( "<div id=\"countryselectdiv_" + c + "\" class=\"controlpanelcountry\" onmouseover=\"baseOnMouseOver( '" + c + "' );\" onmouseout=\"onMouseOut( '" + c + "' );\"></div>" );
-		$( "#countryselectdiv_" + c ).append( "<input type=\"checkbox\" id=\"countryselect_" + c + "\" name=\"countryselect\" value=\"" + c + "\" checked />" );
-		
-		var cw = $( "#countryselect_" + c ).width();
-		
-		$( "#countryselectdiv_" + c ).append( "<label id=\"countrylabel_" + c + "\" for=\"countryselect_" + c + "\"><img id=\"countryimage_" + c + "\" height=\"" + cw + "px\" src=\"css/images/flag_" + c + ".png\" />" + countries[c] + "</label>" );
-		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + Colors[c] + "; color: " + Colors[c] + ";\"></div>" );
-		$( "#countryselectdiv_" + c ).append( "<div style=\"clear: both;\"></div>" );
-	}
-		
-	fillEvents();
-	
-	for( var v in views ) {
-		$( "#viewlist" ).append( "<div id=\"viewselectdiv" + v + "\" class=\"controlpanelcountry\"></div>" );
-		$( "#viewselectdiv" + v ).append( "<input type=\"radio\" id=\"viewselect_" + v + "\" name=\"viewselect\" value=\"" + v + "\" "+ views[v][1] +" />" );
-		
-		$( "#viewselectdiv" + v ).append( "<label id=\"viewlabel_" + v + "\" for=\"viewselect_" + v + "\">" + views[v][0] + "</label>" );
-		$( "#viewselectdiv" + v ).append( "<div style=\"clear: both;\"></div>" );
-	}
-	
-	$( "#yearsselected" ).html( "Years [1800-2010]:" );
-	$( "#slider-year" ).slider({
-      range: true,
-      min: 1800,
-      max: 2010,
-      values: [ 1800, 2010 ],
-      slide: function( event, ui ) {
-		$( "#yearsselected" ).html( "Years [" + ui.values[0] + "-" + ui.values[1] + "]:" );
-      }
-    });
-	
-	$( "#agesselected" ).html( "Ages [0-110+]:" );
-	$( "#slider-age" ).slider({
-      range: true,
-      min: 0,
-      max: 110,
-      values: [ 0, 110 ],
-      slide: function( event, ui ) {
-		$( "#agesselected" ).html( ( "Ages [" + ui.values[0] + "-" + ui.values[1] + "]:" ).replace( "110", "110+" ) );
-      }
-    });
-	
-	for( var g in genders ) {
-		$( "#filterlist" ).append( "<div id=\"genderselectdiv" + genders[g][1] + "\" class=\"controlpanelcountry\"></div>" );
-		$( "#genderselectdiv" + genders[g][1] ).append( "<input type=\"checkbox\" id=\"genderselect" + genders[g][1] + "\" name=\"genderselect\" value=\"" + genders[g][1] + "\" "+ genders[g][2] +" />" );
-		
-		$( "#genderselectdiv" + genders[g][1] ).append( "<label id=\"genderlabel_" + genders[g][1] + "\" for=\"genderselect_" + genders[g][1] + "\">" + genders[g][0] + "</label>" );
-		$( "#genderselectdiv" + genders[g][1] ).append( "<div style=\"clear: both;\"></div>" );
-	}
-	
-	// Add events.
-	$('#countrylist input:checkbox').change(
-		function(){
-			fillVis();
-		} );
-		
-	$('#viewlist input:radio').change(
-		function(){
-			fillVis();
-		} );
-}
-
-function addHelp()
-{
-	var helps = [
-		[ "#countryHelp",		"Select the countries to display data for." ],
-		[ "#viewHelp",			"Select which view to show." ],
-		[ "#filterHelp",		"Select the specific filters to apply to the data." ],
-		[ "#eventHelp",			"Select the events to display data for." ],
-		[ "#helpIcon",			"Help will popup in these tooltips!" ]
-	];
-	
-	for( var h in helps )
-		$(helps[h][0]).qtip( { content: { text: helps[h][1] }, style: { classes: "qtip-dark" }, position: { my: 'bottom center', at: 'top center' }, show: { delay: 0 } } )
-}
-
-function removeIntroBox()
-{
-	$( "#introbox" ).animate({
-		opacity: 0.0,
-		}, 500, function() {
-			$( "#introbox" ).html( "" );
-	});
-	
-	$( "#fadebox" ).animate({
-		opacity: 0.0,
-		}, 500, function() {
-			$( "#fadebox" ).css( "display", "none" );
-	});
-}
-
-function loadScripts()
-{
-	$.getScript( datasets[loadScriptOn][0], function( data, textStatus, jqxhr ) {
-		$( "#introloading" ).html( "LOADING " + datasets[loadScriptOn][1] + "..." );
-		loadScriptOn++;
-		
-		if( loadScriptOn < datasets.length )
-			loadScripts();
-		else {
-			$( "#introloading" ).html( "<div class=\"loadingbutton\" onclick=\"removeIntroBox();\">LOADING COMPLETE CLICK TO CONTINUE</div>" );
-			fillControls();
-			generateVis();
-			fillVis();
-		}
-	});
-}
-
-function introBox()
-{
-	$( "body" ).height( $( document ).height() );
-	$( "#fadebox" ).width( $( document ).width() );
-	$( "#fadebox" ).height( $( document ).height() );
-
-	var hWidth = $( document ).width() * .5;
-	var hHeight = $( document ).height() * .5;
-
-	$( "#introbox" ).width( hWidth );
-	
-	$( "#introbox" ).css( "left", hWidth - hWidth * .5 );
-	$( "#introbox" ).css( "top", hHeight - $( "#introbox" ).height() * .5 );
-	
-	loadScripts();
 }
 
 $(function () {
