@@ -9,16 +9,12 @@ function addCommas( val ){
 function introBox()
 {
 	$( "body" ).height( $( document ).height() );
-	$( "#fadebox" ).width( $( document ).width() );
-	$( "#fadebox" ).height( $( document ).height() );
+	$( "#fadebox" ).width( $( document ).width() ).height( $( document ).height() );
 
 	var hWidth = $( document ).width() * .5;
 	var hHeight = $( document ).height() * .5;
 
-	$( "#introbox" ).width( hWidth );
-	
-	$( "#introbox" ).css( "left", hWidth - hWidth * .5 );
-	$( "#introbox" ).css( "top", hHeight - $( "#introbox" ).height() * .5 );
+	$( "#introbox" ).width( hWidth ).css( "left", hWidth - hWidth * .5 ).css( "top", hHeight - $( "#introbox" ).height() * .5 );
 	
 	loadScripts();
 }
@@ -115,6 +111,17 @@ function fillEvents()
 	}
 }
 
+// Adds the selected events to the visualization.
+function addSelectedEvents( maxy )
+{
+	var selectedEvents = $('#eventlist input:checkbox:checked').map(function() {
+		return this.value;
+	}).get();
+	
+	for( e in selectedEvents )
+		addEvent( [ [ events[parseInt(selectedEvents[e])][1], 0, maxy ], [ events[parseInt(selectedEvents[e])][2], 0, maxy ] ], graph, overview );
+}
+
 // Fills out all of the controls.
 function fillControls()
 {
@@ -125,7 +132,7 @@ function fillControls()
 		var cw = $( "#countryselect_" + c ).width();
 		
 		$( "#countryselectdiv_" + c ).append( "<label id=\"countrylabel_" + c + "\" for=\"countryselect_" + c + "\"><img id=\"countryimage_" + c + "\" height=\"" + cw + "px\" src=\"css/images/flag_" + c + ".png\" />" + countries[c] + "</label>" );
-		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + Colors[c] + "; color: " + Colors[c] + ";\"></div>" );
+		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + colors[c] + "; color: " + colors[c] + ";\"></div>" );
 		$( "#countryselectdiv_" + c ).append( "<div style=\"clear: both;\"></div>" );
 	}
 		
@@ -139,12 +146,12 @@ function fillControls()
 		$( "#viewselectdiv" + v ).append( "<div style=\"clear: both;\"></div>" );
 	}
 	
-	$( "#yearsselected" ).html( "Years [1800-2010]:" );
+	$( "#yearsselected" ).html( "Years [1800-2020]:" );
 	$( "#slider-year" ).slider({
       range: true,
       min: 1800,
-      max: 2010,
-      values: [ 1800, 2010 ],
+      max: 2020,
+      values: [ 1800, 2020 ],
       slide: function( event, ui ) {
 		$( "#yearsselected" ).html( "Years [" + ui.values[0] + "-" + ui.values[1] + "]:" );
       }

@@ -3,20 +3,27 @@
 <HEAD>
 	<meta charset="utf-8">
 
+	<!-- Framework scripts. -->
 	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
 	<script type="text/javascript" src="js/jquery.qtip.min.js"></script>
 	<script type="text/javascript" src="js/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="js/d3.min.js"></script>
+	
+	<!-- Vis scripts. -->
+	<script type="text/javascript" src="js/constants.js"></script>
 	<script type="text/javascript" src="js/helperfunctions.js"></script>
 	<script type="text/javascript" src="js/datafunctions.js"></script>
 	
+	<!-- Style sheets. -->
 	<link type="text/css" href="css/jquery.qtip.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/jquery-ui.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/style.css" rel="stylesheet" />
 </HEAD>
 
 <BODY>
+<!-- Vis area. -->
 <div id="root" style="margin: auto; width: 100%;" align="center">
+	<!-- Control panel. -->
 	<div id="controlpanel" style="float:left; width: 200px;">
 		<div id="countrypanel" class="controlpanel">
 			Selected Countries:
@@ -49,12 +56,16 @@
 			<div id="eventlist" class="controlpanelinset" ></div>
 		</div>
 	</div>
+	
+	<!-- Vis div. -->
 	<div id="center-root" style="float:left;">
 		<div id="vis"></div>
 		<div id="overview"></div>
 	</div>
 	<div style="clear: both;" ></div>
 </div>
+
+<!-- Hover query div. -->
 <div id="hoverquery" style="position: absolute; display: none;">
 	<img width="20px" id="hqimg" src="#" /><strong id="countryname">Country</strong>
 	<div style="padding-top: 2px;">
@@ -69,6 +80,7 @@
 	<img class="callout" src="css/images/tooltippoint.png" />
 </div>
 
+<!-- Intro box fade background. -->
 <div id="fadebox"></div>
 
 <!-- Intro box for the vis. -->
@@ -103,6 +115,7 @@ var graph;
 var overview;
 var curdata;
 var loadScriptOn = 0;
+var maxy = 0;
 
 function generateVis()
 {
@@ -134,11 +147,11 @@ function generateVis()
 	function brushed()
 	{
 		graph["x"].domain( brush.empty() ? overview["x"].domain() : brush.extent() );
-		for( d in curdata )
-			for( c in curdata[d]["data"] )
-				graph["svg"].select( "." + c + curdata[d]["name"] ).attr( "d", graph[curdata[d]["draw"]]( curdata[d]["data"][c], graph["x"] ) );
+		for( d in curdata["data"] )
+			for( c in curdata["data"][d]["data"] )
+				for( dn in curdata["data"][d]["data"][c]["data"] )
+					graph["svg"].select( "." + c + curdata["data"][d]["name"] ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["data"][dn], graph["x"] ) );
 		
-		graph["svg"].select( ".event" ).attr( "d", graph["valuearea"]( [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ], graph["x"] ) )
 		graph["svg"].select( ".x.axis" ).call( graph["xAxis"] );
 	}
 }
@@ -155,7 +168,7 @@ function fillVis()
 	var view = $( "#viewlist input[type='radio']:checked" ).val();
 	var years = $( "#slider-year" ).slider( "option", "values" );
 
-	curdata = [];
+	curdata = { "data":[], "events":[] };
 	
 	// Gather the data.
 	if( view == VIEW_BIRTHS || view == VIEW_BANDD ) {
@@ -172,7 +185,7 @@ function fillVis()
 			
 		json = json2 = 0;
 			
-		curdata.push( data );
+		curdata["data"].push( data );
 	}
 	
 	if( view == VIEW_DEATHS || view == VIEW_BANDD ) {
@@ -189,7 +202,7 @@ function fillVis()
 			
 		json = json2 = 0;
 			
-		curdata.push( data );
+		curdata["data"].push( data );
 	}
 	
 	if( view == VIEW_POPULATION ) {
@@ -206,7 +219,7 @@ function fillVis()
 			
 		json = json2 = 0;
 			
-		curdata.push( data );
+		curdata["data"].push( data );
 	}
 	
 	/*curdata.push( {
@@ -215,26 +228,20 @@ function fillVis()
 		"type": "XE",
 		"draw": "valuearea"
 	} );*/
-
-	// Add the data
-	graph["svg"].append("path")
-		.attr( "class", "event" )
-		.style( "fill", "gray" )
-		.attr( "d", graph["valuearea"]( [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ], graph["x"] ) )
-		.attr( "clip-path", "url(#clip)" );
 		
 	// Update the axis.
 	var xtent = [], ytent = [];
-	for( var x in curdata )
-		for( var y in curdata[x]["data"] ) 
-			for( var z in curdata[x]["data"][y]["data"] ) {
-				xtent.push( d3.extent( curdata[x]["data"][y]["data"][z], function(d) { return d[0]; } ) );
-				ytent.push( d3.extent( curdata[x]["data"][y]["data"][z], function(d) { if( 2 in d ) return Math.max( d[1], d[2] ); else return d[1]; } ) );
+	for( var x in ["data"] )
+		for( var y in curdata["data"][x]["data"] ) 
+			for( var z in curdata["data"][x]["data"][y]["data"] ) {
+				xtent.push( d3.extent( curdata["data"][x]["data"][y]["data"][z], function(d) { return d[0]; } ) );
+				ytent.push( d3.extent( curdata["data"][x]["data"][y]["data"][z], function(d) { if( 2 in d ) return Math.max( d[1], d[2] ); else return d[1]; } ) );
 			}
 	
+	// Get the new domains for the x and y axis and update their views.
 	var minx = d3.min( xtent, function(d) { return d[0]; } );
 	var maxx = d3.max( xtent, function(d) { return d[1]; } );
-	var maxy = d3.max( ytent, function(d) { return d[1]; } );
+	maxy = d3.max( ytent, function(d) { return d[1]; } );
 	
 	graph["x"].domain( [ minx, maxx ] );
 	graph["y"].domain( [ 0, maxy ] );
@@ -245,9 +252,12 @@ function fillVis()
 	graph["svg"].selectAll("g.x.axis").call( graph["xAxis"] );
 	graph["svg"].selectAll("g.y.axis").call( graph["yAxis"] );
 	overview["svg"].selectAll("g.x.axis").call( overview["xAxis"] );
+	
+	// Add events.
+	addSelectedEvents( maxy );
 		
-	for( var d in curdata )
-		addData( curdata[d], graph, overview );
+	for( var d in curdata["data"] )
+		addData( curdata["data"][d], graph, overview );
 }
 
 $(function () {

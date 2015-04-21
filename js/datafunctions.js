@@ -1,67 +1,3 @@
-var datafade		= .1;
-var datanormal		= .5;
-
-var GENDER_MALE		= 1;
-var GENDER_FEMALE	= 0;
-var GENDER_BOTH		= 2;
-
-// Datasets
-var datasets = [
-	[ "datasets/births.json", "BIRTHS" ],
-	[ "datasets/populations.json", "POPULATIONS" ],
-	[ "datasets/deaths.json", "DEATHS" ],
-	[ "datasets/deathrates.json", "DEATH RATES" ],
-	[ "datasets/ltboth.json", "LIFETIME EXPECTANCIES" ],
-	[ "datasets/ltfemale.json", "MALE LIFETIME EXPECTANCIES" ],
-	[ "datasets/ltmale.json", "FEMALE LIFETIME EXPECTANCIES" ],
-	[ "datasets/events.json", "EVENTS" ]
-	];
-
-var Colors = {
-	"USA": "blue",
-	"JPN": "red",
-	"DEUTNP": "green",
-	"ESP": "yellow",
-	"GBR_NP": "orange",
-	"RUS": "purple",
-	"FRATNP": "black"
-};
-
-var countries = {
-	"USA": "United States",
-	"JPN": "Japan",
-	"DEUTNP": "Germany",
-	"ESP": "Spain",
-	"GBR_NP": "United Kingdom",
-	"RUS": "Russia",
-	"FRATNP": "France"
-};
-
-var dataName = {
-	"D": "Deaths",
-	"B": "Births",
-	"P": "Population"
-};
-
-var genders = [
-	[ "Males", "m", "" ],
-	[ "Females", "f", "" ],
-	[ "Total", "t", "" ],
-	[ "Both", "b", "checked" ]
-];
-
-var VIEW_BIRTHS		= 0;
-var VIEW_DEATHS		= 1;
-var VIEW_POPULATION	= 2;
-var VIEW_BANDD		= 3;
-
-var views = [
-	[ "Births", "" ],
-	[ "Deaths", "" ],
-	[ "Population", "" ],
-	[ "Births and Deaths", "checked" ]
-];
-
 // Bisector for hover queries
 bisectData = d3.bisector( function(d) { return d[0]; } ).left;
 
@@ -71,6 +7,16 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
+function genderFilteredData( dat, gender, maleloc, femaleloc )
+{
+	if( gender == GENDER_MALE )
+		return ( dat[maleloc] );
+	if( gender == GENDER_FEMALE )
+		return ( dat[femaleloc] );
+	
+	return ( dat[maleloc] + dat[femaleloc] );
+}
+
 function genBirths( countries, years, gender )
 {
 	var retdata = {};
@@ -78,24 +24,45 @@ function genBirths( countries, years, gender )
 	
 	// Gather the data.
 	for( var country in countries ) {
+		var partOn = 0;
+		var errOn = 0;
+		var lastData = 0;
 		retdata["data"][countries[country]] = { "data":[], "err":[] };
-		
 		retdata["data"][countries[country]]["data"].push( [] );
 		
 		for( var year = years[0]; year <= years[1]; year++ )
-			if( ""+year in births[countries[country]] )
-				retdata["data"][countries[country]]["data"][0].push( [ year, births[countries[country]][year][gender] ] );
-			else
-				retdata["data"][countries[country]]["data"][0].push( [ year, 0 ] );
+			if( ""+year in births[countries[country]] ) {
+				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				retdata["data"][countries[country]]["data"][partOn].push( lastData );
+			}
+			else {
+				// Missing data! Loop until we find the next valid entry.
+				while( !( ""+year in births[countries[country]] ) && year < years[1] )
+					year++;
+					
+				// Skip the border cases.
+				if( lastData == 0 || year == years[1] )
+					continue;
+					
+				// Move to the next part of the data. Add this as an error part.
+				retdata["data"][countries[country]]["err"].push( [] );
+				retdata["data"][countries[country]]["err"][errOn].push( lastData );
+				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				retdata["data"][countries[country]]["err"][errOn].push( lastData );
 				
-		while( retdata["data"][countries[country]]["data"][0][0][1] == 0 )
-			retdata["data"][countries[country]]["data"][0].shift();
-		while( retdata["data"][countries[country]]["data"][0][retdata["data"][countries[country]]["data"][0].length-1][1] == 0 )
-			retdata["data"][countries[country]]["data"][0].pop();
+				// Go back a year if this is not the last requested year.
+				retdata["data"][countries[country]]["data"].push( [] );
+				errOn++;
+				partOn++;
+				if( year < years[1] )
+					year--;
+			}
 	}
 	
 	return retdata;
 }
+
+
 
 function genPopDeath( countries, years, gender, dat )
 {
@@ -296,7 +263,7 @@ function addData( data, graph, graph2 )
 		for( var nd in data["data"][c]["data"] ) {
 			graph["svg"].append("path")
 				.attr( "class", classn + " " + c + " " + c + data["name"] )
-				.style( pathtype, Colors[c] )
+				.style( pathtype, colors[c] )
 				.attr( "d", graph[data["draw"]]( data["data"][c]["data"][nd], graph["x"] ) )
 				.attr( "dataname", c )
 				.attr( "datanum", nd )
@@ -317,10 +284,37 @@ function addData( data, graph, graph2 )
 				
 			graph2["svg"].append("path")
 				.attr( "class", classn + " " + c )
-				.style( pathtype, Colors[c] )
+				.style( pathtype, colors[c] )
 				.attr( "d", graph2[data["draw"]]( data["data"][c]["data"][nd], graph2["x"] ) )
 				.attr( "dataname", c );
 		}
+}
+
+function addEvent( data, graph, graph2 )
+{
+	graph["svg"].append("path")
+		.attr( "class", "area " + " event" )
+		.style( "fill", colors["Event"] )
+		.attr( "d", graph["valuearea"]( data, graph["x"] ) )
+		//.attr( "eventname", c )
+		.attr( "clip-path", "url(#clip)" )
+		.on( "mouseover",
+		function( d ){
+			;
+		} )
+		.on( "mouseout",
+		function( d ){
+			;
+		} )
+		.on( "mousemove",
+		function( d ){
+			;
+		} );
+		
+	graph2["svg"].append("path")
+		.attr( "class", "event" )
+		.style( "fill", colors["Event"] )
+		.attr( "d", graph2["valuearea"]( data, graph2["x"] ) );
 }
 
 function addClip( graph, width, height )
