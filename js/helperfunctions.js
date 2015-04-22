@@ -109,17 +109,25 @@ function fillEvents()
 		
 		$( "#eventselectdiv" + e ).qtip( { content: { text: "THIS WILL CONTAIN INFO ON THE EVENT." }, style: { classes: "qtip-dark" }, position: { my: 'left center', at: 'right center' }, show: { delay: 0 } } )
 	}
+	
+	// Add click events.
+	$('#eventlist input:checkbox').change(
+		function(){
+			fillVis();
+		} );
 }
 
 // Adds the selected events to the visualization.
-function addSelectedEvents( maxy )
+function addSelectedEvents( curdata, maxy )
 {
 	var selectedEvents = $('#eventlist input:checkbox:checked').map(function() {
-		return this.value;
+		return parseInt( this.value );
 	}).get();
 	
-	for( e in selectedEvents )
-		addEvent( [ [ events[parseInt(selectedEvents[e])][1], 0, maxy ], [ events[parseInt(selectedEvents[e])][2], 0, maxy ] ], graph, overview );
+	for( e in selectedEvents ) {
+		curdata["events"].push( { "num": selectedEvents[e],"data":[ [ events[selectedEvents[e]][1], 0, maxy ], [ events[selectedEvents[e]][2], 0, maxy ] ] } );
+		addEvent( curdata["events"][curdata["events"].length-1], graph, overview );
+	}
 }
 
 // Fills out all of the controls.
@@ -176,7 +184,7 @@ function fillControls()
 		$( "#genderselectdiv" ).append( "<div style=\"clear: both;\"></div>" );
 	}
 	
-	// Add events.
+	// Add click events.
 	$('#countrylist input:checkbox').change(
 		function(){
 			fillVis();

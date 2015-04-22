@@ -7,6 +7,7 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
+// Gathers data for the selected gender types.
 function genderFilteredData( dat, gender, maleloc, femaleloc )
 {
 	if( gender == GENDER_MALE )
@@ -15,6 +16,16 @@ function genderFilteredData( dat, gender, maleloc, femaleloc )
 		return ( dat[femaleloc] );
 	
 	return ( dat[maleloc] + dat[femaleloc] );
+}
+
+// Gathers data for the selected gender types over a range of ages.
+function genderFilteredAgeData( dat, gender, maleloc, femaleloc )
+{
+	var total = 0;
+	for( var age = 0; age < 111; age++ )
+		total += genderFilteredData( dat[age], gender, maleloc, femaleloc )
+	
+	return total;
 }
 
 function genBirths( countries, years, gender )
@@ -62,33 +73,46 @@ function genBirths( countries, years, gender )
 	return retdata;
 }
 
-
-
 function genPopDeath( countries, years, gender, dat )
 {
 	var retdata = {};
 	retdata["data"] = {};
 	
+	// Gather the data.
 	for( var country in countries ) {
+		var partOn = 0;
+		var errOn = 0;
+		var lastData = 0;
 		retdata["data"][countries[country]] = { "data":[], "err":[] };
-		
 		retdata["data"][countries[country]]["data"].push( [] );
 		
-		for( var year = years[0]; year <= years[1]; year++ ) {
+		for( var year = years[0]; year <= years[1]; year++ )
 			if( ""+year in dat[countries[country]] ) {
-				var totalPop = 0;
-				for( var age = 0; age < 111; age++ ) {
-					if( gender == GENDER_MALE )
-						totalPop += ( dat[countries[country]][year][age][GENDER_MALE] );
-					if( gender == GENDER_FEMALE )
-						totalPop += ( dat[countries[country]][year][age][GENDER_FEMALE] );
-					if( gender == GENDER_BOTH )
-						totalPop += ( dat[countries[country]][year][age][0] + dat[countries[country]][year][age][1] );
-				}
-				
-				retdata["data"][countries[country]]["data"][0].push( [ year, totalPop ] );
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				retdata["data"][countries[country]]["data"][partOn].push( lastData );
 			}
-		}
+			else {
+				// Missing data! Loop until we find the next valid entry.
+				while( !( ""+year in dat[countries[country]] ) && year < years[1] )
+					year++;
+					
+				// Skip the border cases.
+				if( lastData == 0 || year == years[1] )
+					continue;
+					
+				// Move to the next part of the data. Add this as an error part.
+				retdata["data"][countries[country]]["err"].push( [] );
+				retdata["data"][countries[country]]["err"][errOn].push( lastData );
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				retdata["data"][countries[country]]["err"][errOn].push( lastData );
+				
+				// Go back a year if this is not the last requested year.
+				retdata["data"][countries[country]]["data"].push( [] );
+				errOn++;
+				partOn++;
+				if( year < years[1] )
+					year--;
+			}
 	}
 	
 	return retdata;
@@ -262,25 +286,16 @@ function addData( data, graph, graph2 )
 	for( var c in data["data"] )
 		for( var nd in data["data"][c]["data"] ) {
 			graph["svg"].append("path")
-				.attr( "class", classn + " " + c + " " + c + data["name"] )
+				.attr( "class", classn + " " + c + " " + c + data["name"] + nd )
 				.style( pathtype, colors[c] )
 				.attr( "d", graph[data["draw"]]( data["data"][c]["data"][nd], graph["x"] ) )
 				.attr( "dataname", c )
 				.attr( "datanum", nd )
 				.attr( "datatype", data["type"] )
 				.attr( "clip-path", "url(#clip)" )
-				.on( "mouseover",
-				function( d ){
-					onMouseOver( this, data, graph );
-				} )
-				.on( "mouseout",
-				function( d ){
-					onMouseOut( this );
-				} )
-				.on( "mousemove",
-				function( d ){
-					updateHoverQuery( this, data, graph );
-				} );
+				.on( "mouseover", function( d ){ onMouseOver( this, data, graph ); } )
+				.on( "mouseout", function( d ){ onMouseOut( this ); } )
+				.on( "mousemove", function( d ){ updateHoverQuery( this, data, graph ); } );
 				
 			graph2["svg"].append("path")
 				.attr( "class", classn + " " + c )
@@ -293,28 +308,22 @@ function addData( data, graph, graph2 )
 function addEvent( data, graph, graph2 )
 {
 	graph["svg"].append("path")
-		.attr( "class", "area " + " event" )
+		.attr( "class", "area " + " event " + "event" + data["num"] )
 		.style( "fill", colors["Event"] )
-		.attr( "d", graph["valuearea"]( data, graph["x"] ) )
+		.attr( "d", graph["valuearea"]( data["data"], graph["x"] ) )
 		//.attr( "eventname", c )
 		.attr( "clip-path", "url(#clip)" )
 		.on( "mouseover",
-		function( d ){
-			;
-		} )
+		function( d ){ ; } )
 		.on( "mouseout",
-		function( d ){
-			;
-		} )
+		function( d ){ ; } )
 		.on( "mousemove",
-		function( d ){
-			;
-		} );
+		function( d ){ ; } );
 		
 	graph2["svg"].append("path")
 		.attr( "class", "event" )
 		.style( "fill", colors["Event"] )
-		.attr( "d", graph2["valuearea"]( data, graph2["x"] ) );
+		.attr( "d", graph2["valuearea"]( data["data"], graph2["x"] ) );
 }
 
 function addClip( graph, width, height )

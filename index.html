@@ -128,18 +128,18 @@ function generateVis()
 	height = visheight * .8 - margin.top - margin.bottom - 6;
 	height2 = visheight * .2 - margin.top - margin.bottom - 9;
 		
-	graph = addGraph( "#vis", margin, width, height, [0, width], [height, 0], [1800,2020], [0, 2400000], 20, 20 );
-	overview = addGraph( "#overview", margin, width, height2, [0,width], [height2, 0], [1800,2020], [0, 2400000], 20, 0 );
+	graph = addGraph( "#vis", margin, width, height, [0, width], [height, 0], [0,0], [0, 0], 20, 20 );
+	overview = addGraph( "#overview", margin, width, height2, [0,width], [height2, 0], [0,0], [0, 0], 20, 0 );
 	addClip( graph, width, height );
 	
+	// Add the linking and brushing mechanism.
 	var brush = d3.svg.brush()
 		.x( overview["x"] )
 		.on( "brush", brushed );
 	
-	// Add the linking and brushing mechanism.
-	overview["svg"].append("g")
-      .attr("class", "x brush")
-      .call(brush)
+	overview["svg"].append( "g" )
+      .attr( "class", "x brush" )
+      .call( brush )
     .selectAll( "rect" )
       .attr( "y", -6 )
       .attr( "height", height2 + 7 );
@@ -149,8 +149,11 @@ function generateVis()
 		graph["x"].domain( brush.empty() ? overview["x"].domain() : brush.extent() );
 		for( d in curdata["data"] )
 			for( c in curdata["data"][d]["data"] )
-				for( dn in curdata["data"][d]["data"][c]["data"] )
-					graph["svg"].select( "." + c + curdata["data"][d]["name"] ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["data"][dn], graph["x"] ) );
+				for( nd in curdata["data"][d]["data"][c]["data"] )
+					graph["svg"].select( "." + c + curdata["data"][d]["name"] + nd ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["data"][nd], graph["x"] ) );
+					
+		for( e in curdata["events"] )
+			graph["svg"].select( ".event" + curdata["events"][e]["num"] ).attr( "d", graph["valuearea"]( curdata["events"][e]["data"], graph["x"] ) );
 		
 		graph["svg"].select( ".x.axis" ).call( graph["xAxis"] );
 	}
@@ -221,13 +224,6 @@ function fillVis()
 			
 		curdata["data"].push( data );
 	}
-	
-	/*curdata.push( {
-		"data": [ [ 1870, 0, 2400000 ], [ 1871, 0, 2400000 ] ],
-		"name": "France Something",
-		"type": "XE",
-		"draw": "valuearea"
-	} );*/
 		
 	// Update the axis.
 	var xtent = [], ytent = [];
@@ -254,7 +250,7 @@ function fillVis()
 	overview["svg"].selectAll("g.x.axis").call( overview["xAxis"] );
 	
 	// Add events.
-	addSelectedEvents( maxy );
+	addSelectedEvents( curdata, maxy );
 		
 	for( var d in curdata["data"] )
 		addData( curdata["data"][d], graph, overview );
