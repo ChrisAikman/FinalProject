@@ -2,6 +2,9 @@
 var datafade		= .1;
 var datanormal		= .5;
 
+// Hover query constants.
+var cursoroffset	= 13;
+
 // Gender constants.
 var GENDER_FEMALE	= 0;
 var GENDER_MALE		= 1;
@@ -45,9 +48,22 @@ var dataName = {
 	"D": "Deaths",
 	"B": "Births",
 	"P": "Population",
-	"D": "% Death Rate",
+	"R": "% Death Rate",
 	"L": "Life Expectancy"
 	};
+	
+var genderDisplay = {
+	"#hoverquery": {
+		"F": "Female",
+		"M": "Male",
+		"T": "Total"
+	},
+	"#hoverquery2": {
+		"F": "",
+		"M": "",
+		"T": ""
+	}
+}
 
 var genders = [
 	[ "Females", "F", "" ],
@@ -60,16 +76,16 @@ var genders = [
 var VIEW_BIRTHS				= 0;
 var VIEW_DEATHS				= 1;
 var VIEW_POPULATION			= 2;
-var VIEW_DEATHRATES			= 3
-var VIEW_LIFEEXPECTANCY		= 4;
-var VIEW_BANDD				= 5;
+var VIEW_DEATHRATES			= 99;
+var VIEW_LIFEEXPECTANCY		= 3;
+var VIEW_BANDD				= 4;
 
 // View type names.
 var views = [
 	[ "Births", "" ],
 	[ "Deaths", "" ],
 	[ "Population", "" ],
-	[ "Death Rates", "" ],
+	//[ "Death Rates", "" ],
 	[ "Life Expectancy", "" ],
 	[ "Births and Deaths", "checked" ]
 ];

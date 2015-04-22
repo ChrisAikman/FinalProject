@@ -78,7 +78,7 @@ path.error {
   shape-rendering: crispEdges;
 }
 
-#hoverquery  {
+#hoverquery, #hoverquery2  {
 	background-color: #ddd;
 	opacity: 0.8;
 	width: 250px;
@@ -88,13 +88,17 @@ path.error {
 	text-align: center;
 }
 
-#hoverquery span {
+#hoverquery span, #hoverquery2 span {
     z-index: 10;
 	padding: 5px;
 }
 
 #hoverquery strong {
 	font-size: 2em;
+}
+
+#hoverquery2 strong {
+	font-size: 1.8em;
 }
 
 #vis, #overview {
@@ -110,8 +114,21 @@ path.error {
 .callout {
 	z-index: 20;
 	position: absolute;
+}
+
+.calloutbottom {
 	top: 75px;
 	left: 117px;
+}
+
+.callouttop {
+	top: -8px;
+	left: 117px;
+}
+
+.calloutright {
+	top: 30;
+	left: 250;
 }
 
 .controlpanel {

@@ -13,7 +13,7 @@ function introBox()
 
 	var hWidth = $( document ).width() * .5;
 	var hHeight = $( document ).height() * .5;
-
+	
 	$( "#introbox" ).width( hWidth ).css( "left", hWidth - hWidth * .5 ).css( "top", hHeight - $( "#introbox" ).height() * .5 );
 	
 	loadScripts();
@@ -57,11 +57,12 @@ function loadScripts()
 function addHelp()
 {
 	var helps = [
-		[ "#countryHelp",		"Select the countries to display data for.",			"left center",		"right center" ],
-		[ "#viewHelp",			"Select which view to show.",							"left center",		"right center" ],
-		[ "#filterHelp",		"Select the specific filters to apply to the data.",	"left center",		"right center" ],
-		[ "#eventHelp",			"Select the events to display data for.",				"left center",		"right center" ],
-		[ "#helpIcon",			"Help will popup in these tooltips!",					"bottom center",	"top center" ]
+		[ "#countryHelp",		"Select the countries to display data for.",												"left center",		"right center" ],
+		[ "#viewHelp",			"Select which view to show.",																"left center",		"right center" ],
+		[ "#filterHelp",		"Select the specific filters to apply to the data.",										"left center",		"right center" ],
+		[ "#eventHelp",			"Select the events to display data for.",													"left center",		"right center" ],
+		[ "#versionHelp",		"Select the version of the vis to display. Please change these based on the survey.",		"left center",		"right center" ],
+		[ "#helpIcon",			"Help will popup in these tooltips!",														"bottom center",	"top center" ]
 	];
 	
 	for( var h in helps )
@@ -71,29 +72,62 @@ function addHelp()
 // Updates the hover query when something is moused over
 function updateHoverQuery( sel, da, graph )
 {
-	var left = d3.mouse( sel )[0] + leftOffset + $( "#vis" ).position().left - $( "#hoverquery" ).width() / 2;
-	var top = d3.mouse( sel )[1] + topOffset + $( "#vis" ).position().top - $( "#hoverquery" ).height() - 13;
-	$( "#hoverquery" ).css( "left", ""+left );
-	$( "#hoverquery" ).css( "top", ""+top );
-	$( "#countryname" ).html( countries[ d3.select( sel ).attr( "dataname" ) ] );
+	// Update position.
+	var left = d3.mouse( sel )[0] + leftOffset + $( "#vis" ).position().left - $( hqbox ).width() / 2;
+	var top = d3.mouse( sel )[1] + topOffset + $( "#vis" ).position().top - $( hqbox ).height();
+	$( ".callout" ).css( "display", "none" );
+	
+	if( left > $( "body" ).width() - $( hqbox ).width() ) {
+		$( ".calloutright" ).css( "display", "" );
+		left -= $( hqbox ).width() / 2 + cursoroffset;
+		top +=  $( hqbox ).height() / 2;
+	}
+	else if( top < $( hqbox ).height() ) {
+		$( ".callouttop" ).css( "display", "" );
+		top += $( hqbox ).height() + cursoroffset * 2;
+	}
+	else {
+		$( ".calloutbottom" ).css( "display", "" );
+		top -= cursoroffset;
+	}
+	
+	$( hqbox ).css( "left", ""+left );
+	$( hqbox ).css( "top", ""+top );
+	
+	// Update data.
+	$( ".hqcountryname" ).html( countries[ d3.select( sel ).attr( "dataname" ) ] );
 	var type = d3.select( sel ).attr( "datatype" );
 	var dnum = d3.select( sel ).attr( "datanum" );
-	$( "#hqimg" ).attr( "src", "css/images/flag_" + d3.select( sel ).attr( "dataname" ) + ".png" );
+	$( ".hqimg" ).attr( "src", "css/images/flag_" + d3.select( sel ).attr( "dataname" ) + ".png" );
 	
-	var dat = da["data"][d3.select( sel ).attr( "dataname" )]["data"][dnum];
-	var x0 = graph["x"].invert( d3.mouse(sel)[0] );
-	var i = bisectData( dat, x0 );
-	var d0 = dat[i - 1];
-	var d1 = dat[i];
-	var d = x0 - d0[0] > d1[0] - x0 ? d1 : d0;
-	
-	$( "#year" ).html( d[0] );
-	if( type[1] == "M" )
-		$( "#data" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
-	else if( type[1] == "F" )
-		$( "#data" ).html( "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
-	else if( type[1] == "B" )
-		$( "#data" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) + "<BR>" + "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[2] ) ) );
+	if( type[0] != "E" ) {
+		var dat = da["data"][d3.select( sel ).attr( "dataname" )]["data"][dnum];
+		var x0 = graph["x"].invert( d3.mouse(sel)[0] );
+		var i = bisectData( dat, x0 );
+		var d0 = dat[i - 1];
+		var d1 = dat[i];
+		
+		if( d0 == undefined )
+			d0 = d1;
+		if( d1 == undefined )
+			d1 = d0;
+		
+		var d = x0 - d0[0] > d1[0] - x0 ? d1 : d0;
+		
+		$( ".hqyear" ).html( d[0] );
+		if( type[1] == "M" )
+			$( ".hqdata" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
+		else if( type[1] == "F" )
+			$( ".hqdata" ).html( "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
+		else if( type[1] == "T" )
+			$( ".hqdata" ).html( "Total " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
+		else if( type[1] == "B" )
+			$( ".hqdata" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) + "<BR>" + "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[2] ) ) );
+	}
+	else {
+		$( ".hqdata" ).html( "Missing data." );
+		$( ".hqyear" ).html( Math.round( graph["x"].invert( d3.mouse(sel)[0] ) ) );
+	}
 }
 
 // Fills the events panel with events that involve currently selected years and countries.
@@ -173,6 +207,7 @@ function fillControls()
       values: [ 0, 110 ],
       slide: function( event, ui ) {
 		$( "#agesselected" ).html( ( "Ages [" + ui.values[0] + "-" + ui.values[1] + "]:" ).replace( "110", "110+" ) );
+		fillVis();
       }
     });
 	
@@ -197,6 +232,12 @@ function fillControls()
 		
 	$('#viewlist input:radio').change(
 		function(){
+			fillVis();
+		} );
+		
+	$('#versionlist input:radio').change(
+		function(){
+			hqbox = ( "#hoverquery" + $( "#versionlist input[type='radio']:checked" ).val() ).replace( "1", "" );
 			fillVis();
 		} );
 }

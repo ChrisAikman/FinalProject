@@ -19,23 +19,23 @@ function genderFilteredData( dat, gender, maleloc, femaleloc )
 }
 
 // Gathers data for the selected gender types over a range of ages.
-function genderFilteredAgeData( dat, gender, maleloc, femaleloc )
+function genderFilteredAgeData( dat, gender, maleloc, femaleloc, ages )
 {
 	var total = 0;
-	for( var age = 0; age < 111; age++ )
+	for( var age = ages[0]; age <= ages[1]; age++ )
 		total += genderFilteredData( dat[age], gender, maleloc, femaleloc )
 	
 	return total;
 }
 
 // Gathers data for the selected gender types over a range of ages.
-function avgFilteredData( dat, val, maleloc, femaleloc )
+function avgFilteredData( dat, val, maleloc, femaleloc, ages )
 {
 	var total = 0;
-	for( var age = 0; age < 111; age++ )
+	for( var age = ages[0]; age <= ages[1]; age++ )
 		total += genderFilteredData( dat[age], gender, maleloc, femaleloc )
 		
-	total /= 111;
+	total /= ( ages[1] + 1 - ages[0] );
 	total *= 100;
 	
 	return total;
@@ -55,7 +55,7 @@ function valFilteredData( dat, val )
 	return total;
 }
 
-function genBirths( countries, years, gender )
+function genBirths( countries, years, gender, ages )
 {
 	var retdata = {};
 	retdata["data"] = {};
@@ -70,7 +70,7 @@ function genBirths( countries, years, gender )
 		
 		for( var year = years[0]; year <= years[1]; year++ )
 			if( ""+year in births[countries[country]] ) {
-				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 				retdata["data"][countries[country]]["data"][partOn].push( lastData );
 			}
 			else {
@@ -85,7 +85,7 @@ function genBirths( countries, years, gender )
 				// Move to the next part of the data. Add this as an error part.
 				retdata["data"][countries[country]]["err"].push( [] );
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
 				
 				// Go back a year if this is not the last requested year.
@@ -100,7 +100,7 @@ function genBirths( countries, years, gender )
 	return retdata;
 }
 
-function genPopDeath( countries, years, gender, dat )
+function genPopDeath( countries, years, gender, dat, ages )
 {
 	var retdata = {};
 	retdata["data"] = {};
@@ -115,7 +115,7 @@ function genPopDeath( countries, years, gender, dat )
 		
 		for( var year = years[0]; year <= years[1]; year++ )
 			if( ""+year in dat[countries[country]] ) {
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 				retdata["data"][countries[country]]["data"][partOn].push( lastData );
 			}
 			else {
@@ -130,7 +130,7 @@ function genPopDeath( countries, years, gender, dat )
 				// Move to the next part of the data. Add this as an error part.
 				retdata["data"][countries[country]]["err"].push( [] );
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
 				
 				// Go back a year if this is not the last requested year.
@@ -145,7 +145,7 @@ function genPopDeath( countries, years, gender, dat )
 	return retdata;
 }
 
-function genLTData( countries, years, dat, val )
+function genLTData( countries, years, dat, val, ages )
 {
 	var retdata = {};
 	retdata["data"] = {};
@@ -160,7 +160,7 @@ function genLTData( countries, years, dat, val )
 		
 		for( var year = years[0]; year <= years[1]; year++ )
 			if( ""+year in dat[countries[country]] ) {
-				lastData = [ year, valFilteredData( dat[countries[country]][year], val ) ];
+				lastData = [ year, valFilteredData( dat[countries[country]][year], val, ages ) ];
 				retdata["data"][countries[country]]["data"][partOn].push( lastData );
 			}
 			else {
@@ -175,7 +175,7 @@ function genLTData( countries, years, dat, val )
 				// Move to the next part of the data. Add this as an error part.
 				retdata["data"][countries[country]]["err"].push( [] );
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, valFilteredData( dat[countries[country]][year], val ) ];
+				lastData = [ year, valFilteredData( dat[countries[country]][year], val, ages ) ];
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
 				
 				// Go back a year if this is not the last requested year.
@@ -190,7 +190,7 @@ function genLTData( countries, years, dat, val )
 	return retdata;
 }
 
-function genDRData( countries, years, gender, dat )
+function genDRData( countries, years, gender, dat, ages )
 {
 	var retdata = {};
 	retdata["data"] = {};
@@ -205,7 +205,7 @@ function genDRData( countries, years, gender, dat )
 		
 		for( var year = years[0]; year <= years[1]; year++ )
 			if( ""+year in dat[countries[country]] ) {
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 				retdata["data"][countries[country]]["data"][partOn].push( lastData );
 			}
 			else {
@@ -220,7 +220,7 @@ function genDRData( countries, years, gender, dat )
 				// Move to the next part of the data. Add this as an error part.
 				retdata["data"][countries[country]]["err"].push( [] );
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
 				
 				// Go back a year if this is not the last requested year.
@@ -331,12 +331,12 @@ function onMouseOver( obj, data, graph ) {
 	
 	d3.select( obj ).moveToFront();
 	
-	$( "#hoverquery" ).css( "display", "" );
+	$( hqbox ).css( "display", "" );
 	updateHoverQuery( obj, data, graph );
 }
 
 function onMouseOut( obj ){
-	$( "#hoverquery" ).css( "display", "none" );
+	$( hqbox ).css( "display", "none" );
 	var otherlines = $( '.area, .line' ).not( obj );
 	d3.selectAll( otherlines ).transition().style( "opacity", datanormal );
 }
@@ -375,8 +375,10 @@ function addData( data, graph, graph2 )
 				.attr( "dataname", c );
 		}
 		
-		for( var e in data["data"][c]["err"] )
-			addError( data["data"][c]["err"][e], graph, graph2, c, data["draw"], data["type"], data["name"], e )
+		// Draw the errors if the correct version is selected.
+		if( $( "#versionlist input[type='radio']:checked" ).val() == "1" )
+			for( var e in data["data"][c]["err"] )
+				addError( data["data"][c]["err"][e], graph, graph2, c, data["draw"], data["type"], data["name"], e )
 	}
 		
 	
@@ -408,10 +410,11 @@ function addError( data, graph, graph2, c, drawtype, datatype, dataname, err )
 	graph["svg"].append("path")
 		.attr( "class", "line error " + c + " err" + c + dataname + err )
 		.style( "stroke", colors[c] )
+		.style( "fill", "white" )
 		.attr( "d", graph[drawtype]( data, graph["x"] ) )
 		.attr( "dataname", c )
 		//.attr( "datanum", nd )
-		//.attr( "datatype", datatype )
+		.attr( "datatype", "E" )
 		.attr( "clip-path", "url(#clip)" )
 		.on( "mouseover", function( d ){ onMouseOver( this, data, graph ); } )
 		.on( "mouseout", function( d ){ onMouseOut( this ); } )
@@ -420,6 +423,7 @@ function addError( data, graph, graph2, c, drawtype, datatype, dataname, err )
 	graph2["svg"].append("path")
 		.attr( "class", "line overview error " + c )
 		.style( "stroke", colors[c] )
+		.style( "fill", "white" )
 		.attr( "d", graph2[drawtype]( data, graph2["x"] ) )
 		.attr( "dataname", c );
 }

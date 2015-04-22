@@ -34,12 +34,22 @@
 			Selected View:
 			<div id="viewHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
 			<div id="viewlist" class="controlpanelinset" ></div>
+			Selected Version:
+			<div id="versionHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
+			<div id="versionlist" class="controlpanelinset" >
+				<div class="controlpanelcountry">
+					<input id="V1R" type="radio" name="versionselect" value="1" checked/>
+					<label for="V1R">V1</label>
+					<input id="V2R" type="radio" name="versionselect" value="2"/>
+					<label for="V2R">V2</label>
+				</div>
+			</div>
 		</div>
 		<div id="filterspanel" class="controlpanel">
 			Selected Filters:
 			<div id="filterHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
 			<div id="filterlist" class="controlpanelinset" >
-				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
+				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px; display: none;">
 					<span id="yearsselected"></span>
 					<div id="slider-year" style="margin:5px; margin-left: 8px; margin-right: 13px;"></div>
 				</div>
@@ -65,19 +75,36 @@
 	<div style="clear: both;" ></div>
 </div>
 
-<!-- Hover query div. -->
+<!-- Hover query div V1. -->
 <div id="hoverquery" style="position: absolute; display: none;">
-	<img width="20px" id="hqimg" src="#" /><strong id="countryname">Country</strong>
+	<img class="callouttop callout" src="css/images/tooltippoint_top.png" />
+	<img width="20px" class="hqimg" src="#" /><strong class="hqcountryname">Country</strong>
 	<div style="padding-top: 2px;">
-		<div id="year" style="float: left; padding-left: 5px; font-size: 1.8em;">
+		<div class="hqyear" style="float: left; padding-left: 5px; font-size: 1.8em;">
 			YEAR
 		</div>
-		<div id="data" style="float: left; padding-left: 5px; text-align: left;">
+		<div class="hqdata" style="float: left; padding-left: 5px; text-align: left;">
 			Data
 		</div>
 		<div style="clear: both;"></div>
 	</div>
-	<img class="callout" src="css/images/tooltippoint.png" />
+	<img class="calloutright callout" src="css/images/tooltippoint_right.png" />
+	<img class="calloutbottom callout" src="css/images/tooltippoint_bottom.png" />
+</div>
+
+<!-- Hover query div V2. -->
+<div id="hoverquery2" style="position: absolute; display: none;">
+	<img class="callouttop callout" src="css/images/tooltippoint_top.png" />
+	<strong class="hqcountryname">Country</strong><strong> - </strong><strong class="hqyear"></strong>
+	<div style="padding-top: 2px;">
+		<img width="32px" class="hqimg" src="#" style="float: left; margin-left: 10px;" />
+		<div class="hqdata" style="float: left; padding-left: 5px; text-align: left;">
+			Data
+		</div>
+		<div style="clear: both;"></div>
+	</div>
+	<img class="calloutright callout" src="css/images/tooltippoint_right.png" />
+	<img class="calloutbottom callout" src="css/images/tooltippoint_bottom.png" />
 </div>
 
 <!-- Intro box fade background. -->
@@ -89,7 +116,9 @@
 		<h1 style="font-family: Century Gothic, sans-serif;">EFFECTS OF HISTORIC EVENTS ON LIFE AND MORTALITY</h1>
 		<h2 style="font-family: Century Gothic, sans-serif;">Based on Data from <a href="http://mortality.org">The Human Mortality Database</a></h2>
 	</div>
-	<img style="margin-top: 10px; margin-left: 15px; margin-right: 15px; float: right; border: 1px solid black; height: 117px;" src="css/images/VisThumb.png"></img>
+	<div style="width: 300px; height: 117px; margin-top: 10px; margin-left: 15px; margin-right: 15px; float: right;  border: 1px solid black;">
+		<img src="css/images/VisThumb.png"></img>
+	</div>
 	<p>
 		Human mortality is a topic that has been of interest throughout history. Since the beginning of the scientific age, great efforts have been made to extend the average lifespan and reduce risk of death. A major contributing factor to changes in birth and death rates is historic events. Wars, diseases and scientific breakthroughs have all contributed to changes in population.  The goal of this project is to use past mortality and population data to make connections between lifespan, population growth and historical events.
 	</p>
@@ -116,6 +145,7 @@ var overview;
 var curdata;
 var loadScriptOn = 0;
 var maxy = 0;
+var hqbox = "#hoverquery";
 
 function generateVis()
 {
@@ -203,6 +233,7 @@ function fillVis()
 	var view = $( "#viewlist input[type='radio']:checked" ).val();
 	var gender = $( "#filterlist input[type='radio']:checked" ).val();
 	var years = $( "#slider-year" ).slider( "option", "values" );
+	var ages = $( "#slider-age" ).slider( "option", "values" );
 
 	curdata = { "data":[], "events":[] };
 	
@@ -210,55 +241,55 @@ function fillVis()
 	
 	if( view == VIEW_BIRTHS || view == VIEW_BANDD ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genBirths( selectedCountries, years, GENDER_MALE );
+			json = genBirths( selectedCountries, years, GENDER_MALE, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genBirths( selectedCountries, years, GENDER_FEMALE );
+			json2 = genBirths( selectedCountries, years, GENDER_FEMALE, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genBirths( selectedCountries, years, GENDER_TOTAL );
+			json3 = genBirths( selectedCountries, years, GENDER_TOTAL, ages );
 			
 		fillData( json, json2, json3, gender, "birhts", "B" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_DEATHS || view == VIEW_BANDD ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genPopDeath( selectedCountries, years, GENDER_MALE, deaths );
+			json = genPopDeath( selectedCountries, years, GENDER_MALE, deaths, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, deaths );
+			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, deaths, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, deaths );
+			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, deaths, ages );
 			
 		fillData( json, json2, json3, gender, "deaths", "D" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_POPULATION ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genPopDeath( selectedCountries, years, GENDER_MALE, populations );
+			json = genPopDeath( selectedCountries, years, GENDER_MALE, populations, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, populations );
+			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, populations, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, populations );
+			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, populations, ages );
 			
 		fillData( json, json2, json3, gender, "populations", "P" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_LIFEEXPECTANCY ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genLTData( selectedCountries, years, ltmale, 1 );
+			json = genLTData( selectedCountries, years, ltmale, 1, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genLTData( selectedCountries, years, ltfemale, 1 );
+			json2 = genLTData( selectedCountries, years, ltfemale, 1, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genLTData( selectedCountries, years, ltboth, 1 );
+			json3 = genLTData( selectedCountries, years, ltboth, 1, ages );
 
 		fillData( json, json2, json3, gender, "lifeexpectancy", "L" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_DEATHRATES ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genDRData( selectedCountries, years, GENDER_MALE, deathrates );
+			json = genDRData( selectedCountries, years, GENDER_MALE, deathrates, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genDRData( selectedCountries, years, GENDER_MALE, deathrates );
+			json2 = genDRData( selectedCountries, years, GENDER_MALE, deathrates, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genDRData( selectedCountries, years, GENDER_BOTH, deathrates );
+			json3 = genDRData( selectedCountries, years, GENDER_BOTH, deathrates, ages );
 
 		fillData( json, json2, json3, gender, "deathrates", "R" + genders[gender][1] );
 	}
