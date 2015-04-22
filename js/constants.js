@@ -5,7 +5,8 @@ var datanormal		= .5;
 // Gender constants.
 var GENDER_FEMALE	= 0;
 var GENDER_MALE		= 1;
-var GENDER_BOTH		= 2;
+var GENDER_TOTAL	= 2;
+var GENDER_BOTH		= 3;
 
 // Datasets
 var datasets = [
@@ -47,10 +48,10 @@ var dataName = {
 	};
 
 var genders = [
-	[ "Males", "m", "" ],
-	[ "Females", "f", "" ],
-	[ "Total", "t", "" ],
-	[ "Both", "b", "checked" ]
+	[ "Females", "F", "" ],
+	[ "Males", "M", "" ],
+	[ "Total", "T", "" ],
+	[ "Both", "B", "checked" ]
 	];
 
 // View types constants.

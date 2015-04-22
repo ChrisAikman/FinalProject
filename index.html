@@ -89,7 +89,7 @@
 		<h1 style="font-family: Century Gothic, sans-serif;">EFFECTS OF HISTORIC EVENTS ON LIFE AND MORTALITY</h1>
 		<h2 style="font-family: Century Gothic, sans-serif;">Based on Data from <a href="http://mortality.org">The Human Mortality Database</a></h2>
 	</div>
-	<img style="margin-top: 10px; margin-left: 15px; margin-right: 15px; float: right; border: 1px solid black; width: 300px;" src="css/images/VisThumb.png"></img>
+	<img style="margin-top: 10px; margin-left: 15px; margin-right: 15px; float: right; border: 1px solid black; height: 117px;" src="css/images/VisThumb.png"></img>
 	<p>
 		Human mortality is a topic that has been of interest throughout history. Since the beginning of the scientific age, great efforts have been made to extend the average lifespan and reduce risk of death. A major contributing factor to changes in birth and death rates is historic events. Wars, diseases and scientific breakthroughs have all contributed to changes in population.  The goal of this project is to use past mortality and population data to make connections between lifespan, population growth and historical events.
 	</p>
@@ -159,6 +159,34 @@ function generateVis()
 	}
 }
 
+// Add the data based on filters.
+function fillData( json, json2, json3, gender, name, type )
+{
+	var data = {};
+	data["data"] = {};
+	data["name"] = name;
+	data["type"] = type;
+	
+	if( gender == GENDER_BOTH ) {
+		data["draw"] = "valuearea";
+		for( var c in json["data"] )
+			data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
+			
+		json = json2 = 0;
+	}
+	else
+		data["draw"] = "valueline";
+		
+	if( gender == GENDER_MALE )
+		data["data"] = json["data"];
+	if( gender == GENDER_FEMALE )
+		data["data"] = json2["data"];
+	if( gender == GENDER_TOTAL )
+		data["data"] = json3["data"];
+		
+	curdata["data"].push( data );
+}
+
 function fillVis()
 {
 	graph["svg"].selectAll("path").remove();
@@ -169,60 +197,44 @@ function fillVis()
 	}).get();
 	
 	var view = $( "#viewlist input[type='radio']:checked" ).val();
+	var gender = $( "#filterlist input[type='radio']:checked" ).val();
 	var years = $( "#slider-year" ).slider( "option", "values" );
 
 	curdata = { "data":[], "events":[] };
 	
-	// Gather the data.
+	var json, json2, json3;
+	
 	if( view == VIEW_BIRTHS || view == VIEW_BANDD ) {
-		var json = genBirths( selectedCountries, years, GENDER_MALE );
-		var json2 = genBirths( selectedCountries, years, GENDER_FEMALE );
-		
-		var data = {};
-		data["data"] = {};
-		data["name"] = "births";
-		data["type"] = "BB";
-		data["draw"] = "valuearea";
-		for( var c in json["data"] )
-			data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
+		if( gender == GENDER_MALE || gender == GENDER_BOTH )
+			json = genBirths( selectedCountries, years, GENDER_MALE );
+		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
+			json2 = genBirths( selectedCountries, years, GENDER_FEMALE );
+		if( gender == GENDER_TOTAL )
+			json3 = genBirths( selectedCountries, years, GENDER_TOTAL );
 			
-		json = json2 = 0;
-			
-		curdata["data"].push( data );
+		fillData( json, json2, json3, gender, "birhts", "B" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_DEATHS || view == VIEW_BANDD ) {
-		var json = genPopDeath( selectedCountries, years, GENDER_MALE, deaths );
-		var json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, deaths );
-		
-		var data = {};
-		data["data"] = {};
-		data["name"] = "deaths";
-		data["type"] = "DB";
-		data["draw"] = "valuearea";
-		for( var c in json["data"] )
-			data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
+		if( gender == GENDER_MALE || gender == GENDER_BOTH )
+			json = genPopDeath( selectedCountries, years, GENDER_MALE, deaths );
+		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
+			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, deaths );
+		if( gender == GENDER_TOTAL )
+			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, deaths );
 			
-		json = json2 = 0;
-			
-		curdata["data"].push( data );
+		fillData( json, json2, json3, gender, "deaths", "D" + genders[gender][1] );
 	}
 	
-	if( view == VIEW_POPULATION ) {
-		var json = genPopDeath( selectedCountries, years, GENDER_MALE, populations );
-		var json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, populations );
-		
-		var data = {};
-		data["data"] = {};
-		data["name"] = "deaths";
-		data["type"] = "PB";
-		data["draw"] = "valuearea";
-		for( var c in json["data"] )
-			data["data"][c] = areaCombine( json["data"][c], json2["data"][c], 0, 1 );
+	if( view == VIEW_POPULATION || view == VIEW_BANDD ) {
+		if( gender == GENDER_MALE || gender == GENDER_BOTH )
+			json = genPopDeath( selectedCountries, years, GENDER_MALE, populations );
+		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
+			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, populations );
+		if( gender == GENDER_TOTAL )
+			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, populations );
 			
-		json = json2 = 0;
-			
-		curdata["data"].push( data );
+		fillData( json, json2, json3, gender, "populations", "P" + genders[gender][1] );
 	}
 		
 	// Update the axis.

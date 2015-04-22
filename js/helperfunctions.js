@@ -178,7 +178,7 @@ function fillControls()
 	
 	$( "#filterlist" ).append( "<div id=\"genderselectdiv" + "\" class=\"controlpanelcountry\"></div>" );
 	for( var g in genders ) {
-		$( "#genderselectdiv" ).append( "<input type=\"radio\" id=\"genderselect" + genders[g][1] + "\" name=\"genderselect\" value=\"" + genders[g][1] + "\" "+ genders[g][2] +" />" );
+		$( "#genderselectdiv" ).append( "<input type=\"radio\" id=\"genderselect_" + genders[g][1] + "\" name=\"genderselect\" value=\"" + g + "\" "+ genders[g][2] +" />" );
 		
 		$( "#genderselectdiv" ).append( "<label id=\"genderlabel_" + genders[g][1] + "\" for=\"genderselect_" + genders[g][1] + "\">" + genders[g][0] + "</label>" );
 		$( "#genderselectdiv" ).append( "<div style=\"clear: both;\"></div>" );
@@ -186,6 +186,11 @@ function fillControls()
 	
 	// Add click events.
 	$('#countrylist input:checkbox').change(
+		function(){
+			fillVis();
+		} );
+		
+	$('#filterlist input:radio').change(
 		function(){
 			fillVis();
 		} );

@@ -118,6 +118,51 @@ function genPopDeath( countries, years, gender, dat )
 	return retdata;
 }
 
+/*function genLTData( countries, years, gender, dat )
+{
+	var retdata = {};
+	retdata["data"] = {};
+	
+	// Gather the data.
+	for( var country in countries ) {
+		var partOn = 0;
+		var errOn = 0;
+		var lastData = 0;
+		retdata["data"][countries[country]] = { "data":[], "err":[] };
+		retdata["data"][countries[country]]["data"].push( [] );
+		
+		for( var year = years[0]; year <= years[1]; year++ )
+			if( ""+year in dat[countries[country]] ) {
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				retdata["data"][countries[country]]["data"][partOn].push( lastData );
+			}
+			else {
+				// Missing data! Loop until we find the next valid entry.
+				while( !( ""+year in dat[countries[country]] ) && year < years[1] )
+					year++;
+					
+				// Skip the border cases.
+				if( lastData == 0 || year == years[1] )
+					continue;
+					
+				// Move to the next part of the data. Add this as an error part.
+				retdata["data"][countries[country]]["err"].push( [] );
+				retdata["data"][countries[country]]["err"][errOn].push( lastData );
+				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE ) ];
+				retdata["data"][countries[country]]["err"][errOn].push( lastData );
+				
+				// Go back a year if this is not the last requested year.
+				retdata["data"][countries[country]]["data"].push( [] );
+				errOn++;
+				partOn++;
+				if( year < years[1] )
+					year--;
+			}
+	}
+	
+	return retdata;
+}*/
+
 function genLTData( countries, years, gender, ages, val, dat )
 {
 	var retdata = {};
@@ -274,10 +319,8 @@ function addData( data, graph, graph2 )
 {
 	var classn = "";
 	var pathtype = "";
-	if( data["draw"] == "valueline" ) {
+	if( data["draw"] == "valueline" )
 		classn = "line";
-		pathtype = "stroke";
-	}
 	if( data["draw"] == "valuearea" ) {
 		classn = "area";
 		pathtype = "fill"
@@ -288,6 +331,7 @@ function addData( data, graph, graph2 )
 			graph["svg"].append("path")
 				.attr( "class", classn + " " + c + " " + c + data["name"] + nd )
 				.style( pathtype, colors[c] )
+				.style( "stroke", colors[c] )
 				.attr( "d", graph[data["draw"]]( data["data"][c]["data"][nd], graph["x"] ) )
 				.attr( "dataname", c )
 				.attr( "datanum", nd )
@@ -298,7 +342,7 @@ function addData( data, graph, graph2 )
 				.on( "mousemove", function( d ){ updateHoverQuery( this, data, graph ); } );
 				
 			graph2["svg"].append("path")
-				.attr( "class", classn + " " + c )
+				.attr( "class", classn + " overview" + classn + " " + c )
 				.style( pathtype, colors[c] )
 				.attr( "d", graph2[data["draw"]]( data["data"][c]["data"][nd], graph2["x"] ) )
 				.attr( "dataname", c );
@@ -321,9 +365,13 @@ function addEvent( data, graph, graph2 )
 		function( d ){ ; } );
 		
 	graph2["svg"].append("path")
-		.attr( "class", "event" )
+		.attr( "class", "area event" )
 		.style( "fill", colors["Event"] )
 		.attr( "d", graph2["valuearea"]( data["data"], graph2["x"] ) );
+}
+
+function addError( data, graph, graph2 )
+{
 }
 
 function addClip( graph, width, height )

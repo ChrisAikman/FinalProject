@@ -28,9 +28,13 @@ a:hover {
 }
 
 path.line { 
-	#stroke-width: 2;
+	stroke-width: 5;
 	fill: none;
 	opacity: 0.5;
+}
+
+path.overviewline {
+	stroke-width: 1;
 }
 
 #title {
@@ -43,6 +47,11 @@ path.line {
 
 .area {
 	opacity: 0.5;
+	stroke-width: 1;
+}
+
+.overviewarea {
+	stroke-width: 1;
 }
 
 .axis path,
