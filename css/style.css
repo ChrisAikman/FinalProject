@@ -50,6 +50,12 @@ path.overviewline {
 	stroke-width: 1;
 }
 
+path.error {
+	stroke-width: 1;
+	opacity: 0.5;
+	stroke-dasharray: 3,3;
+}
+
 .overviewarea {
 	stroke-width: 1;
 }

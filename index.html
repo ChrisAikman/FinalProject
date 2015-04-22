@@ -148,9 +148,13 @@ function generateVis()
 	{
 		graph["x"].domain( brush.empty() ? overview["x"].domain() : brush.extent() );
 		for( d in curdata["data"] )
-			for( c in curdata["data"][d]["data"] )
+			for( c in curdata["data"][d]["data"] ) {
 				for( nd in curdata["data"][d]["data"][c]["data"] )
 					graph["svg"].select( "." + c + curdata["data"][d]["name"] + nd ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["data"][nd], graph["x"] ) );
+				
+				for( e in curdata["data"][d]["data"][c]["err"] )
+					graph["svg"].select( ".err" + c + curdata["data"][d]["name"] + e ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["err"][e], graph["x"] ) );
+			}
 					
 		for( e in curdata["events"] )
 			graph["svg"].select( ".event" + curdata["events"][e]["num"] ).attr( "d", graph["valuearea"]( curdata["events"][e]["data"], graph["x"] ) );
@@ -226,7 +230,7 @@ function fillVis()
 		fillData( json, json2, json3, gender, "deaths", "D" + genders[gender][1] );
 	}
 	
-	if( view == VIEW_POPULATION || view == VIEW_BANDD ) {
+	if( view == VIEW_POPULATION ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
 			json = genPopDeath( selectedCountries, years, GENDER_MALE, populations );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
@@ -235,6 +239,28 @@ function fillVis()
 			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, populations );
 			
 		fillData( json, json2, json3, gender, "populations", "P" + genders[gender][1] );
+	}
+	
+	if( view == VIEW_LIFEEXPECTANCY ) {
+		if( gender == GENDER_MALE || gender == GENDER_BOTH )
+			json = genLTData( selectedCountries, years, ltmale, 1 );
+		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
+			json2 = genLTData( selectedCountries, years, ltfemale, 1 );
+		if( gender == GENDER_TOTAL )
+			json3 = genLTData( selectedCountries, years, ltboth, 1 );
+
+		fillData( json, json2, json3, gender, "lifeexpectancy", "L" + genders[gender][1] );
+	}
+	
+	if( view == VIEW_DEATHRATES ) {
+		if( gender == GENDER_MALE || gender == GENDER_BOTH )
+			json = genDRData( selectedCountries, years, GENDER_MALE, deathrates );
+		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
+			json2 = genDRData( selectedCountries, years, GENDER_MALE, deathrates );
+		if( gender == GENDER_TOTAL )
+			json3 = genDRData( selectedCountries, years, GENDER_BOTH, deathrates );
+
+		fillData( json, json2, json3, gender, "deathrates", "R" + genders[gender][1] );
 	}
 		
 	// Update the axis.

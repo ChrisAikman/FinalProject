@@ -44,7 +44,9 @@ var countries = {
 var dataName = {
 	"D": "Deaths",
 	"B": "Births",
-	"P": "Population"
+	"P": "Population",
+	"D": "% Death Rate",
+	"L": "Life Expectancy"
 	};
 
 var genders = [
@@ -55,15 +57,19 @@ var genders = [
 	];
 
 // View types constants.
-var VIEW_BIRTHS		= 0;
-var VIEW_DEATHS		= 1;
-var VIEW_POPULATION	= 2;
-var VIEW_BANDD		= 3;
+var VIEW_BIRTHS				= 0;
+var VIEW_DEATHS				= 1;
+var VIEW_POPULATION			= 2;
+var VIEW_DEATHRATES			= 3
+var VIEW_LIFEEXPECTANCY		= 4;
+var VIEW_BANDD				= 5;
 
 // View type names.
 var views = [
 	[ "Births", "" ],
 	[ "Deaths", "" ],
 	[ "Population", "" ],
+	[ "Death Rates", "" ],
+	[ "Life Expectancy", "" ],
 	[ "Births and Deaths", "checked" ]
 ];
