@@ -2,6 +2,7 @@
 
 <HEAD>
 	<meta charset="utf-8">
+	<link rel="shortcut icon" href="favicon.png" type="image/x-png" />
 
 	<!-- Framework scripts. -->
 	<script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
@@ -138,7 +139,7 @@ window.onresize = function( event ) {
 
 var margin,	width, height, height2;
 
-var leftOffset = 70;
+var leftOffset = 50;
 var topOffset = 10;
 var graph;
 var overview;
@@ -224,6 +225,8 @@ function fillData( json, json2, json3, gender, name, type )
 function fillVis()
 {
 	graph["svg"].selectAll("path").remove();
+	graph["svg"].selectAll(".titletext").remove();
+	graph["svg"].selectAll("image").remove();
 	overview["svg"].selectAll("path").remove();
 
 	var selectedCountries = $('#countrylist input:checkbox:checked').map(function() {
@@ -234,6 +237,8 @@ function fillVis()
 	var gender = $( "#filterlist input[type='radio']:checked" ).val();
 	var years = $( "#slider-year" ).slider( "option", "values" );
 	var ages = $( "#slider-age" ).slider( "option", "values" );
+	
+	addTitleText( graph, view, selectedCountries, ages );
 
 	curdata = { "data":[], "events":[] };
 	
@@ -297,7 +302,7 @@ function fillVis()
 	// Update the axis.
 	var xtent = [], ytent = [];
 	for( var x in ["data"] )
-		for( var y in curdata["data"][x]["data"] ) 
+		for( var y in curdata["data"][x]["data"] )
 			for( var z in curdata["data"][x]["data"][y]["data"] ) {
 				xtent.push( d3.extent( curdata["data"][x]["data"][y]["data"][z], function(d) { return d[0]; } ) );
 				ytent.push( d3.extent( curdata["data"][x]["data"][y]["data"][z], function(d) { if( 2 in d ) return Math.max( d[1], d[2] ); else return d[1]; } ) );
@@ -307,6 +312,10 @@ function fillVis()
 	var minx = d3.min( xtent, function(d) { return d[0]; } );
 	var maxx = d3.max( xtent, function(d) { return d[1]; } );
 	maxy = d3.max( ytent, function(d) { return d[1]; } );
+	maxy = roundTens( maxy );
+	
+	//var majYScale = d3.scale.linear().range( [height,0] ).domain( [0, maxy] );
+	//var majYAxis = d3.svg.axis().scale( majYScale ).orient( "left" ).ticks( 10 ).tickSize( -width );
 	
 	graph["x"].domain( [ minx, maxx ] );
 	graph["y"].domain( [ 0, maxy ] );
@@ -314,8 +323,23 @@ function fillVis()
 	overview["x"].domain( [ minx, maxx ] );
 	overview["y"].domain( [ 0, maxy ] );
 	
+	var tickOn = 0;
+	var tickVals = [];
+	var tickMinVals = [];
+	for( var y = 0; y <= maxy; y += maxy/20 ) {
+		var fixy = Math.round( y * 100 ) / 100;
+		tickMinVals.push( fixy );
+		if( tickOn % 2 == 0 )
+			tickVals.push( fixy );
+		tickOn++;
+	}
+	
+	graph["yAxis"].ticks( 10 ).tickValues( tickVals );
+	graph["yMinAxis"].ticks( 20 ).tickValues( tickMinVals );
+	
 	graph["svg"].selectAll("g.x.axis").call( graph["xAxis"] );
 	graph["svg"].selectAll("g.y.axis").call( graph["yAxis"] );
+	graph["svg"].selectAll("g.ymin.axis").call( graph["yMinAxis"] );
 	overview["svg"].selectAll("g.x.axis").call( overview["xAxis"] );
 	
 	// Add events.

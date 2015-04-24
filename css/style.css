@@ -66,6 +66,7 @@ path.error {
 	stroke: grey;
 	stroke-width: 1;
 	shape-rendering: crispEdges;
+	opacity: .8;
 }
 .axis .minor line {
 	stroke: #777;

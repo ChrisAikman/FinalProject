@@ -5,6 +5,31 @@ function addCommas( val ){
 	return val;
 }
 
+// Add unit suffix to the numbers.
+function addSuffix( num ) {
+	if( num < 1000 )
+		return "" + addCommas( num );
+	if( num < 1000000 )
+		return addCommas( num /= 1000 ) + "K";
+	if( num < 10000000 )
+		return addCommas( ( num / 1000000 ).toFixed( 2 ) ) + "M";
+	if( num < 100000000 )
+		return addCommas( ( num / 1000000 ).toFixed( 1 ) ) + "M";
+		
+	return addCommas( num /= 1000000 ) + "M"
+}
+
+// Rounds a number up to the nearest tens.
+function roundTens( num ) {
+	var deci = 1;
+	while( num > 1 ) {
+		deci *= 10;
+		num /= 10;
+	}
+	
+	return Math.round( ( num * 100 ) + .5 ) * ( deci / 100 );
+}
+
 // This makes the introbox and displays it.
 function introBox()
 {
@@ -240,4 +265,43 @@ function fillControls()
 			hqbox = ( "#hoverquery" + $( "#versionlist input[type='radio']:checked" ).val() ).replace( "1", "" );
 			fillVis();
 		} );
+}
+
+function addTitleText( graph, view, selectedCountries, ages )
+{
+	graph["svg"].append( "text" )
+		.text( "" )
+		.attr( "id", "vistitle" )
+		.attr( "class", "titletext" )
+		.attr( "x", 10 )
+		.attr( "y", 30 )
+		.attr( "fill", "black" )
+		.attr( "opacity", .25 )
+		.attr( "font-size", "30px" )
+		.attr( "font-family", titlefont );
+		
+	$( "#vistitle" ).html( views[ view ][0] );
+	
+	for( c in selectedCountries )
+		graph["svg"].append( "image" )
+		   .attr( "x", 10 + c * 40 )
+		   .attr( "y", 32 )
+		   .attr( "width", 30 )
+		   .attr( "height", 30 )
+		   .attr( "opacity", .25 )
+		   .attr( "xlink:href", "css/images/flag_" + selectedCountries[c] + ".png" );
+		
+	graph["svg"].append( "text" )
+		.text( "" )
+		.attr( "id", "titlefilter" )
+		.attr( "class", "titletext" )
+		.attr( "x", 10 )
+		.attr( "y", 80 )
+		.attr( "fill", "black" )
+		.attr( "opacity", .25 )
+		.attr( "font-size", "20px" )
+		.attr( "font-weight", "500" )
+		.attr( "font-family", titlefont );
+		
+	$( "#titlefilter" ).html( "For Ages " + ages[0] + " - " + ages[1] );
 }

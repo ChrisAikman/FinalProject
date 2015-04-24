@@ -2,6 +2,9 @@
 var datafade		= .1;
 var datanormal		= .5;
 
+// Title constants.
+var titlefont = "Century Gothic, sans-serif"
+
 // Hover query constants.
 var cursoroffset	= 13;
 

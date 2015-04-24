@@ -235,6 +235,7 @@ function genDRData( countries, years, gender, dat, ages )
 	return retdata;
 }
 
+// Combine two single data sets into one, making it an area set.
 function areaCombineS( data1, data2, key, combine )
 {
 	var newData = [];
@@ -245,6 +246,7 @@ function areaCombineS( data1, data2, key, combine )
 	return newData;
 }
 
+// Combines two data sets into one, making it an area set. This combines both data and missing data.
 function areaCombine( data1, data2, key, combine )
 {
 	var newData = { "data":[], "err":[] };
@@ -258,7 +260,8 @@ function areaCombine( data1, data2, key, combine )
 	return newData;
 }
 
-function addWidths( data1, data2 )
+// Old method of showing exaggerated data.
+/*function addWidths( data1, data2 )
 {
 	for( var key in data1["data"] )
 		for( var elem in data1["data"][key] ) {
@@ -267,8 +270,9 @@ function addWidths( data1, data2 )
 			data1["data"][key][elem][1] = orig - expand;
 			data1["data"][key][elem].push( orig + expand );
 		}
-}
+}*/
 
+// Adds the graph to the page.
 function addGraph( id, margin, width, height, xrange, yrange, xdomain, ydomain, xticks, yticks )
 {
 	var graph = {};
@@ -276,12 +280,15 @@ function addGraph( id, margin, width, height, xrange, yrange, xdomain, ydomain, 
 	// Set the domainds and ranges for each dimension
 	graph["x"] = d3.scale.linear().range( xrange ).domain( xdomain );
 	graph["y"] = d3.scale.linear().range( yrange ).domain( ydomain );
+	//graph["yMinScale" ] = d3.scale.linear().range( yrange ).domain( ydomain );
 
 	// Define the axes
 	if( xticks != 0 )
 		graph["xAxis"] = d3.svg.axis().scale( graph["x"] ).orient( "bottom" ).ticks( xticks ).tickFormat( d3.format( "d" ) );
-	if( yticks != 0 )
-		graph["yAxis"] = d3.svg.axis().scale( graph["y"] ).orient( "left" ).ticks( yticks ).tickSize( -width );
+	if( yticks != 0 ) {
+		graph["yAxis"] = d3.svg.axis().scale( graph["y"] ).orient( "left" ).ticks( yticks / 2 ).tickFormat( function( d ){ return addSuffix( d ); } );
+		graph["yMinAxis" ] = d3.svg.axis().scale( graph["y"] ).orient( "left" ).ticks( yticks ).tickSize( -width ).tickFormat( '' );
+	}
 		
 	// Adds the svg canvas
 	graph["svg"] = d3.select( id )
@@ -298,10 +305,15 @@ function addGraph( id, margin, width, height, xrange, yrange, xdomain, ydomain, 
 			.attr( "transform", "translate(0," + height + ")" )
 			.call( graph["xAxis"] );
 	// Add the Y Axis
-	if( yticks != 0 )
+	if( yticks != 0 ) {
 		graph["svg"].append( "g" )
 			.attr( "class", "y axis" )
 			.call( graph["yAxis"] );
+		graph["svg"].append( "g" )
+			.attr( "class", "ymin axis" )
+			.call( graph["yMinAxis"] );
+	}
+			
 		
 	// Define how line data should be formed
 	graph["valueline"] = d3.svg.line()
