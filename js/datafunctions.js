@@ -55,55 +55,44 @@ function valFilteredData( dat, val )
 	return total;
 }
 
-function genBirths( countries, years, gender, ages )
+function genSpecificYearData( datatype, country, year, gender, ages )
 {
-	var retdata = {};
-	retdata["data"] = {};
-	
-	// Gather the data.
-	for( var country in countries ) {
-		var partOn = 0;
-		var errOn = 0;
-		var lastData = 0;
-		retdata["data"][countries[country]] = { "data":[], "err":[] };
-		retdata["data"][countries[country]]["data"].push( [] );
-		
-		for( var year = years[0]; year <= years[1]; year++ )
-			if( ""+year in births[countries[country]] ) {
-				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
-				retdata["data"][countries[country]]["data"][partOn].push( lastData );
-			}
-			else {
-				// Missing data! Loop until we find the next valid entry.
-				while( !( ""+year in births[countries[country]] ) && year < years[1] )
-					year++;
-					
-				// Skip the border cases.
-				if( lastData == 0 || year == years[1] )
-					continue;
-					
-				// Move to the next part of the data. Add this as an error part.
-				retdata["data"][countries[country]]["err"].push( [] );
-				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, genderFilteredData( births[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
-				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				
-				// Go back a year if this is not the last requested year.
-				retdata["data"][countries[country]]["data"].push( [] );
-				errOn++;
-				partOn++;
-				if( year < years[1] )
-					year--;
-			}
-	}
-	
-	return retdata;
+	if( datatype == DATA_BIRTHS )
+		return [ year, genderFilteredData( births[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
+	if( datatype == DATA_DEATHS )
+		return [ year, genderFilteredAgeData( deaths[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
+	if( datatype == DATA_POPULATION )
+		return [ year, genderFilteredAgeData( populations[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
+	if( datatype == DATA_LIFEEXPECTANCY_M )
+		return [ year, valFilteredData( ltmale[country][year], 1, ages ) ];
+	if( datatype == DATA_LIFEEXPECTANCY_F )
+		return [ year, valFilteredData( ltfemale[country][year], 1, ages ) ];
+	if( datatype == DATA_LIFEEXPECTANCY_T )
+		return [ year, valFilteredData( ltboth[country][year], 1, ages ) ];
+	//if( datatype == DATA_DEATHRATE )
+		//return [ year, genderFilteredAgeData( deathrates[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 }
 
-function genPopDeath( countries, years, gender, dat, ages )
+function genYearData( datatype, countries, years, gender, ages )
 {
 	var retdata = {};
 	retdata["data"] = {};
+	
+	// Set the right data.
+	var curdata;
+	
+	if( datatype == DATA_BIRTHS )
+		curdata = births;
+	else if( datatype == DATA_DEATHS )
+		curdata = deaths;
+	else if( datatype == DATA_POPULATION )
+		curdata = populations;
+	else if( datatype == DATA_LIFEEXPECTANCY_M )
+		curdata = ltmale;
+	else if( datatype == DATA_LIFEEXPECTANCY_F )
+		curdata = ltfemale;
+	else if( datatype == DATA_LIFEEXPECTANCY_T )
+		curdata = ltboth;
 	
 	// Gather the data.
 	for( var country in countries ) {
@@ -114,13 +103,13 @@ function genPopDeath( countries, years, gender, dat, ages )
 		retdata["data"][countries[country]]["data"].push( [] );
 		
 		for( var year = years[0]; year <= years[1]; year++ )
-			if( ""+year in dat[countries[country]] ) {
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
+			if( ""+year in curdata[countries[country]] ) {
+				lastData = genSpecificYearData( datatype, countries[country], year, gender, ages );
 				retdata["data"][countries[country]]["data"][partOn].push( lastData );
 			}
 			else {
 				// Missing data! Loop until we find the next valid entry.
-				while( !( ""+year in dat[countries[country]] ) && year < years[1] )
+				while( !( ""+year in curdata[countries[country]] ) && year < years[1] )
 					year++;
 					
 				// Skip the border cases.
@@ -130,97 +119,7 @@ function genPopDeath( countries, years, gender, dat, ages )
 				// Move to the next part of the data. Add this as an error part.
 				retdata["data"][countries[country]]["err"].push( [] );
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
-				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				
-				// Go back a year if this is not the last requested year.
-				retdata["data"][countries[country]]["data"].push( [] );
-				errOn++;
-				partOn++;
-				if( year < years[1] )
-					year--;
-			}
-	}
-	
-	return retdata;
-}
-
-function genLTData( countries, years, dat, val, ages )
-{
-	var retdata = {};
-	retdata["data"] = {};
-	
-	// Gather the data.
-	for( var country in countries ) {
-		var partOn = 0;
-		var errOn = 0;
-		var lastData = 0;
-		retdata["data"][countries[country]] = { "data":[], "err":[] };
-		retdata["data"][countries[country]]["data"].push( [] );
-		
-		for( var year = years[0]; year <= years[1]; year++ )
-			if( ""+year in dat[countries[country]] ) {
-				lastData = [ year, valFilteredData( dat[countries[country]][year], val, ages ) ];
-				retdata["data"][countries[country]]["data"][partOn].push( lastData );
-			}
-			else {
-				// Missing data! Loop until we find the next valid entry.
-				while( !( ""+year in dat[countries[country]] ) && year < years[1] )
-					year++;
-					
-				// Skip the border cases.
-				if( lastData == 0 || year == years[1] )
-					continue;
-					
-				// Move to the next part of the data. Add this as an error part.
-				retdata["data"][countries[country]]["err"].push( [] );
-				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, valFilteredData( dat[countries[country]][year], val, ages ) ];
-				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				
-				// Go back a year if this is not the last requested year.
-				retdata["data"][countries[country]]["data"].push( [] );
-				errOn++;
-				partOn++;
-				if( year < years[1] )
-					year--;
-			}
-	}
-	
-	return retdata;
-}
-
-function genDRData( countries, years, gender, dat, ages )
-{
-	var retdata = {};
-	retdata["data"] = {};
-	
-	// Gather the data.
-	for( var country in countries ) {
-		var partOn = 0;
-		var errOn = 0;
-		var lastData = 0;
-		retdata["data"][countries[country]] = { "data":[], "err":[] };
-		retdata["data"][countries[country]]["data"].push( [] );
-		
-		for( var year = years[0]; year <= years[1]; year++ )
-			if( ""+year in dat[countries[country]] ) {
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
-				retdata["data"][countries[country]]["data"][partOn].push( lastData );
-			}
-			else {
-				// Missing data! Loop until we find the next valid entry.
-				while( !( ""+year in dat[countries[country]] ) && year < years[1] )
-					year++;
-					
-				// Skip the border cases.
-				if( lastData == 0 || year == years[1] )
-					continue;
-					
-				// Move to the next part of the data. Add this as an error part.
-				retdata["data"][countries[country]]["err"].push( [] );
-				retdata["data"][countries[country]]["err"][errOn].push( lastData );
-				lastData = [ year, genderFilteredAgeData( dat[countries[country]][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
+				lastData = genSpecificYearData( datatype, countries[country], year, gender, ages );
 				retdata["data"][countries[country]]["err"][errOn].push( lastData );
 				
 				// Go back a year if this is not the last requested year.

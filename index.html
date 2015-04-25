@@ -35,7 +35,7 @@
 			Selected View:
 			<div id="viewHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
 			<div id="viewlist" class="controlpanelinset" ></div>
-			Selected Version:
+			<!--Selected Version:
 			<div id="versionHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
 			<div id="versionlist" class="controlpanelinset" >
 				<div class="controlpanelcountry">
@@ -44,7 +44,7 @@
 					<input id="V2R" type="radio" name="versionselect" value="2"/>
 					<label for="V2R">V2</label>
 				</div>
-			</div>
+			</div>-->
 		</div>
 		<div id="filterspanel" class="controlpanel">
 			Selected Filters:
@@ -139,14 +139,31 @@ window.onresize = function( event ) {
 
 var margin,	width, height, height2;
 
-var leftOffset = 50;
-var topOffset = 10;
 var graph;
 var overview;
+var brush;
 var curdata;
 var loadScriptOn = 0;
 var maxy = 0;
 var hqbox = "#hoverquery";
+
+function brushed()
+{
+	graph["x"].domain( brush.empty() ? overview["x"].domain() : brush.extent() );
+	for( d in curdata["data"] )
+		for( c in curdata["data"][d]["data"] ) {
+			for( nd in curdata["data"][d]["data"][c]["data"] )
+				graph["svg"].select( "." + c + curdata["data"][d]["name"] + nd ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["data"][nd], graph["x"] ) );
+			
+			for( e in curdata["data"][d]["data"][c]["err"] )
+				graph["svg"].select( ".err" + c + curdata["data"][d]["name"] + e ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["err"][e], graph["x"] ) );
+		}
+				
+	for( e in curdata["events"] )
+		graph["svg"].select( ".event" + curdata["events"][e]["num"] ).attr( "d", graph["valuearea"]( curdata["events"][e]["data"], graph["x"] ) );
+	
+	graph["svg"].select( ".x.axis" ).call( graph["xAxis"] );
+}
 
 function generateVis()
 {
@@ -154,7 +171,7 @@ function generateVis()
 	var visheight = $( document ).height();
 	var viswidth = $( window ).width() - 200;
 	
-	margin = {top: topOffset, right: 30, bottom: 30, left: leftOffset};
+	margin = {top: offsets["top"], right: offsets["right"], bottom: offsets["bottom"], left: offsets["left"]};
 	width = viswidth - margin.left - margin.right - 9;
 	height = visheight * .8 - margin.top - margin.bottom - 6;
 	height2 = visheight * .2 - margin.top - margin.bottom - 9;
@@ -164,7 +181,7 @@ function generateVis()
 	addClip( graph, width, height );
 	
 	// Add the linking and brushing mechanism.
-	var brush = d3.svg.brush()
+	brush = d3.svg.brush()
 		.x( overview["x"] )
 		.on( "brush", brushed );
 	
@@ -174,24 +191,6 @@ function generateVis()
     .selectAll( "rect" )
       .attr( "y", -6 )
       .attr( "height", height2 + 7 );
-		
-	function brushed()
-	{
-		graph["x"].domain( brush.empty() ? overview["x"].domain() : brush.extent() );
-		for( d in curdata["data"] )
-			for( c in curdata["data"][d]["data"] ) {
-				for( nd in curdata["data"][d]["data"][c]["data"] )
-					graph["svg"].select( "." + c + curdata["data"][d]["name"] + nd ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["data"][nd], graph["x"] ) );
-				
-				for( e in curdata["data"][d]["data"][c]["err"] )
-					graph["svg"].select( ".err" + c + curdata["data"][d]["name"] + e ).attr( "d", graph[curdata["data"][d]["draw"]]( curdata["data"][d]["data"][c]["err"][e], graph["x"] ) );
-			}
-					
-		for( e in curdata["events"] )
-			graph["svg"].select( ".event" + curdata["events"][e]["num"] ).attr( "d", graph["valuearea"]( curdata["events"][e]["data"], graph["x"] ) );
-		
-		graph["svg"].select( ".x.axis" ).call( graph["xAxis"] );
-	}
 }
 
 // Add the data based on filters.
@@ -237,8 +236,6 @@ function fillVis()
 	var gender = $( "#filterlist input[type='radio']:checked" ).val();
 	var years = $( "#slider-year" ).slider( "option", "values" );
 	var ages = $( "#slider-age" ).slider( "option", "values" );
-	
-	addTitleText( graph, view, selectedCountries, ages );
 
 	curdata = { "data":[], "events":[] };
 	
@@ -246,49 +243,49 @@ function fillVis()
 	
 	if( view == VIEW_BIRTHS || view == VIEW_BANDD ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genBirths( selectedCountries, years, GENDER_MALE, ages );
+			json = genYearData( DATA_BIRTHS, selectedCountries, years, GENDER_MALE, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genBirths( selectedCountries, years, GENDER_FEMALE, ages );
+			json2 = genYearData( DATA_BIRTHS, selectedCountries, years, GENDER_FEMALE, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genBirths( selectedCountries, years, GENDER_TOTAL, ages );
+			json3 = genYearData( DATA_BIRTHS, selectedCountries, years, GENDER_TOTAL, ages );
 			
-		fillData( json, json2, json3, gender, "birhts", "B" + genders[gender][1] );
+		fillData( json, json2, json3, gender, "births", "B" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_DEATHS || view == VIEW_BANDD ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genPopDeath( selectedCountries, years, GENDER_MALE, deaths, ages );
+			json = genYearData( DATA_DEATHS, selectedCountries, years, GENDER_MALE, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, deaths, ages );
+			json2 = genYearData( DATA_DEATHS, selectedCountries, years, GENDER_FEMALE, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, deaths, ages );
+			json3 = genYearData( DATA_DEATHS, selectedCountries, years, GENDER_TOTAL, ages );
 			
 		fillData( json, json2, json3, gender, "deaths", "D" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_POPULATION ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genPopDeath( selectedCountries, years, GENDER_MALE, populations, ages );
+			json = genYearData( DATA_POPULATION, selectedCountries, years, GENDER_MALE, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genPopDeath( selectedCountries, years, GENDER_FEMALE, populations, ages );
+			json2 = genYearData( DATA_POPULATION, selectedCountries, years, GENDER_FEMALE, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genPopDeath( selectedCountries, years, GENDER_TOTAL, populations, ages );
+			json3 = genYearData( DATA_POPULATION, selectedCountries, years, GENDER_TOTAL, ages );
 			
 		fillData( json, json2, json3, gender, "populations", "P" + genders[gender][1] );
 	}
 	
 	if( view == VIEW_LIFEEXPECTANCY ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genLTData( selectedCountries, years, ltmale, 1, ages );
+			json = genYearData( DATA_LIFEEXPECTANCY_M, selectedCountries, years, GENDER_MALE, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genLTData( selectedCountries, years, ltfemale, 1, ages );
+			json2 = genYearData( DATA_LIFEEXPECTANCY_F, selectedCountries, years, GENDER_FEMALE, ages );
 		if( gender == GENDER_TOTAL )
-			json3 = genLTData( selectedCountries, years, ltboth, 1, ages );
-
+			json3 = genYearData( DATA_LIFEEXPECTANCY_T, selectedCountries, years, GENDER_TOTAL, ages );
+			
 		fillData( json, json2, json3, gender, "lifeexpectancy", "L" + genders[gender][1] );
 	}
 	
-	if( view == VIEW_DEATHRATES ) {
+	/*if( view == VIEW_DEATHRATES ) {
 		if( gender == GENDER_MALE || gender == GENDER_BOTH )
 			json = genDRData( selectedCountries, years, GENDER_MALE, deathrates, ages );
 		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
@@ -297,7 +294,7 @@ function fillVis()
 			json3 = genDRData( selectedCountries, years, GENDER_BOTH, deathrates, ages );
 
 		fillData( json, json2, json3, gender, "deathrates", "R" + genders[gender][1] );
-	}
+	}*/
 		
 	// Update the axis.
 	var xtent = [], ytent = [];
@@ -341,6 +338,11 @@ function fillVis()
 	graph["svg"].selectAll("g.y.axis").call( graph["yAxis"] );
 	graph["svg"].selectAll("g.ymin.axis").call( graph["yMinAxis"] );
 	overview["svg"].selectAll("g.x.axis").call( overview["xAxis"] );
+	
+	brushed();
+	
+	// Add the title.
+	addTitleText( graph, view, selectedCountries, ages );
 	
 	// Add events.
 	addSelectedEvents( curdata, maxy );

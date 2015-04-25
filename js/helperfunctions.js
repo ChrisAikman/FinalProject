@@ -98,8 +98,8 @@ function addHelp()
 function updateHoverQuery( sel, da, graph )
 {
 	// Update position.
-	var left = d3.mouse( sel )[0] + leftOffset + $( "#vis" ).position().left - $( hqbox ).width() / 2;
-	var top = d3.mouse( sel )[1] + topOffset + $( "#vis" ).position().top - $( hqbox ).height();
+	var left = d3.mouse( sel )[0] + offsets["left"] + $( "#vis" ).position().left - $( hqbox ).width() / 2;
+	var top = d3.mouse( sel )[1] + offsets["top"] + $( "#vis" ).position().top - $( hqbox ).height();
 	$( ".callout" ).css( "display", "none" );
 	
 	if( left > $( "body" ).width() - $( hqbox ).width() ) {
@@ -269,25 +269,26 @@ function fillControls()
 
 function addTitleText( graph, view, selectedCountries, ages )
 {
+	var separationHeight = ( $( "#vis" ).height() - offsets["top"] - offsets["top"] - 16 ) / 20;
 	graph["svg"].append( "text" )
 		.text( "" )
 		.attr( "id", "vistitle" )
 		.attr( "class", "titletext" )
 		.attr( "x", 10 )
-		.attr( "y", 30 )
+		.attr( "y", separationHeight - 1 )
 		.attr( "fill", "black" )
 		.attr( "opacity", .25 )
-		.attr( "font-size", "30px" )
+		.attr( "font-size", separationHeight+"px" )
 		.attr( "font-family", titlefont );
 		
 	$( "#vistitle" ).html( views[ view ][0] );
 	
 	for( c in selectedCountries )
 		graph["svg"].append( "image" )
-		   .attr( "x", 10 + c * 40 )
-		   .attr( "y", 32 )
-		   .attr( "width", 30 )
-		   .attr( "height", 30 )
+		   .attr( "x", 10 + c * ( separationHeight * .8 + 10 ) )
+		   .attr( "y", separationHeight + separationHeight * .2 )
+		   .attr( "width", separationHeight * .8 )
+		   .attr( "height", separationHeight * .8 )
 		   .attr( "opacity", .25 )
 		   .attr( "xlink:href", "css/images/flag_" + selectedCountries[c] + ".png" );
 		
@@ -296,12 +297,12 @@ function addTitleText( graph, view, selectedCountries, ages )
 		.attr( "id", "titlefilter" )
 		.attr( "class", "titletext" )
 		.attr( "x", 10 )
-		.attr( "y", 80 )
+		.attr( "y", separationHeight * 3 )
 		.attr( "fill", "black" )
 		.attr( "opacity", .25 )
-		.attr( "font-size", "20px" )
+		.attr( "font-size", separationHeight-1+"px" )
 		.attr( "font-weight", "500" )
 		.attr( "font-family", titlefont );
 		
-	$( "#titlefilter" ).html( "For Ages " + ages[0] + " - " + ages[1] );
+	$( "#titlefilter" ).html( ( "For Ages " + ages[0] + " - " + ages[1] ).replace( "110", "110+" ) );
 }

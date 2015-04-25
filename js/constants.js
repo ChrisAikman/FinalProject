@@ -8,6 +8,9 @@ var titlefont = "Century Gothic, sans-serif"
 // Hover query constants.
 var cursoroffset	= 13;
 
+// Offsets for the vis.
+var offsets = { "top": 10, "left": 50, "bottom": 30, "right": 30 };
+
 // Gender constants.
 var GENDER_FEMALE	= 0;
 var GENDER_MALE		= 1;
@@ -75,6 +78,15 @@ var genders = [
 	[ "Both", "B", "checked" ]
 	];
 
+// Data types constants.
+var DATA_BIRTHS				= 0;
+var DATA_DEATHS				= 1;
+var DATA_POPULATION			= 2;
+var DATA_DEATHREATES		= 3;
+var DATA_LIFEEXPECTANCY_M	= 4;
+var DATA_LIFEEXPECTANCY_F	= 5;
+var DATA_LIFEEXPECTANCY_T	= 6;
+	
 // View types constants.
 var VIEW_BIRTHS				= 0;
 var VIEW_DEATHS				= 1;
