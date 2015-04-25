@@ -83,9 +83,7 @@ var DATA_BIRTHS				= 0;
 var DATA_DEATHS				= 1;
 var DATA_POPULATION			= 2;
 var DATA_DEATHREATES		= 3;
-var DATA_LIFEEXPECTANCY_M	= 4;
-var DATA_LIFEEXPECTANCY_F	= 5;
-var DATA_LIFEEXPECTANCY_T	= 6;
+var DATA_LIFEEXPECTANCY		= 4;
 	
 // View types constants.
 var VIEW_BIRTHS				= 0;

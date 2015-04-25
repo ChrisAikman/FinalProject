@@ -63,11 +63,11 @@ function genSpecificYearData( datatype, country, year, gender, ages )
 		return [ year, genderFilteredAgeData( deaths[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
 	if( datatype == DATA_POPULATION )
 		return [ year, genderFilteredAgeData( populations[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
-	if( datatype == DATA_LIFEEXPECTANCY_M )
+	if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_MALE )
 		return [ year, valFilteredData( ltmale[country][year], 1, ages ) ];
-	if( datatype == DATA_LIFEEXPECTANCY_F )
+	if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_FEMALE )
 		return [ year, valFilteredData( ltfemale[country][year], 1, ages ) ];
-	if( datatype == DATA_LIFEEXPECTANCY_T )
+	if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_TOTAL )
 		return [ year, valFilteredData( ltboth[country][year], 1, ages ) ];
 	//if( datatype == DATA_DEATHRATE )
 		//return [ year, genderFilteredAgeData( deathrates[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
@@ -87,11 +87,11 @@ function genYearData( datatype, countries, years, gender, ages )
 		curdata = deaths;
 	else if( datatype == DATA_POPULATION )
 		curdata = populations;
-	else if( datatype == DATA_LIFEEXPECTANCY_M )
+	else if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_MALE )
 		curdata = ltmale;
-	else if( datatype == DATA_LIFEEXPECTANCY_F )
+	else if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_FEMALE )
 		curdata = ltfemale;
-	else if( datatype == DATA_LIFEEXPECTANCY_T )
+	else if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_TOTAL )
 		curdata = ltboth;
 	
 	// Gather the data.

@@ -194,8 +194,17 @@ function generateVis()
 }
 
 // Add the data based on filters.
-function fillData( json, json2, json3, gender, name, type )
+function fillData( datatype, selectedCountries, years, ages, gender, name, type )
 {
+	var json, json2, json3;
+	
+	if( gender == GENDER_MALE || gender == GENDER_BOTH )
+		json = genYearData( datatype, selectedCountries, years, GENDER_MALE, ages );
+	if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
+		json2 = genYearData( datatype, selectedCountries, years, GENDER_FEMALE, ages );
+	if( gender == GENDER_TOTAL )
+		json3 = genYearData( datatype, selectedCountries, years, GENDER_TOTAL, ages );
+
 	var data = {};
 	data["data"] = {};
 	data["name"] = name;
@@ -239,62 +248,17 @@ function fillVis()
 
 	curdata = { "data":[], "events":[] };
 	
-	var json, json2, json3;
+	if( view == VIEW_BIRTHS || view == VIEW_BANDD )
+		fillData( DATA_BIRTHS, selectedCountries, years, ages, gender, "births", "B" + genders[gender][1] );
 	
-	if( view == VIEW_BIRTHS || view == VIEW_BANDD ) {
-		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genYearData( DATA_BIRTHS, selectedCountries, years, GENDER_MALE, ages );
-		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genYearData( DATA_BIRTHS, selectedCountries, years, GENDER_FEMALE, ages );
-		if( gender == GENDER_TOTAL )
-			json3 = genYearData( DATA_BIRTHS, selectedCountries, years, GENDER_TOTAL, ages );
-			
-		fillData( json, json2, json3, gender, "births", "B" + genders[gender][1] );
-	}
+	if( view == VIEW_DEATHS || view == VIEW_BANDD )
+		fillData( DATA_DEATHS, selectedCountries, years, ages, gender, "deaths", "D" + genders[gender][1] );
 	
-	if( view == VIEW_DEATHS || view == VIEW_BANDD ) {
-		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genYearData( DATA_DEATHS, selectedCountries, years, GENDER_MALE, ages );
-		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genYearData( DATA_DEATHS, selectedCountries, years, GENDER_FEMALE, ages );
-		if( gender == GENDER_TOTAL )
-			json3 = genYearData( DATA_DEATHS, selectedCountries, years, GENDER_TOTAL, ages );
-			
-		fillData( json, json2, json3, gender, "deaths", "D" + genders[gender][1] );
-	}
+	if( view == VIEW_POPULATION )
+		fillData( DATA_POPULATION, selectedCountries, years, ages, gender, "populations", "P" + genders[gender][1] );
 	
-	if( view == VIEW_POPULATION ) {
-		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genYearData( DATA_POPULATION, selectedCountries, years, GENDER_MALE, ages );
-		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genYearData( DATA_POPULATION, selectedCountries, years, GENDER_FEMALE, ages );
-		if( gender == GENDER_TOTAL )
-			json3 = genYearData( DATA_POPULATION, selectedCountries, years, GENDER_TOTAL, ages );
-			
-		fillData( json, json2, json3, gender, "populations", "P" + genders[gender][1] );
-	}
-	
-	if( view == VIEW_LIFEEXPECTANCY ) {
-		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genYearData( DATA_LIFEEXPECTANCY_M, selectedCountries, years, GENDER_MALE, ages );
-		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genYearData( DATA_LIFEEXPECTANCY_F, selectedCountries, years, GENDER_FEMALE, ages );
-		if( gender == GENDER_TOTAL )
-			json3 = genYearData( DATA_LIFEEXPECTANCY_T, selectedCountries, years, GENDER_TOTAL, ages );
-			
-		fillData( json, json2, json3, gender, "lifeexpectancy", "L" + genders[gender][1] );
-	}
-	
-	/*if( view == VIEW_DEATHRATES ) {
-		if( gender == GENDER_MALE || gender == GENDER_BOTH )
-			json = genDRData( selectedCountries, years, GENDER_MALE, deathrates, ages );
-		if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-			json2 = genDRData( selectedCountries, years, GENDER_MALE, deathrates, ages );
-		if( gender == GENDER_TOTAL )
-			json3 = genDRData( selectedCountries, years, GENDER_BOTH, deathrates, ages );
-
-		fillData( json, json2, json3, gender, "deathrates", "R" + genders[gender][1] );
-	}*/
+	if( view == VIEW_LIFEEXPECTANCY )
+		fillData( DATA_LIFEEXPECTANCY, selectedCountries, years, ages, gender, "lifeexpectancy", "L" + genders[gender][1] );
 		
 	// Update the axis.
 	var xtent = [], ytent = [];
