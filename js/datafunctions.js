@@ -134,6 +134,48 @@ function genYearData( datatype, countries, years, gender, ages )
 	return retdata;
 }
 
+function genAgeData( datatype, countries, years, gender, ages )
+{
+	var retdata = {};
+	retdata["data"] = {};
+	
+	// Set the right data.
+	var curdata;
+	
+	if( datatype == DATA_BIRTHS )
+		curdata = births;
+	else if( datatype == DATA_DEATHS )
+		curdata = deaths;
+	else if( datatype == DATA_POPULATION )
+		curdata = populations;
+	else if( datatype == DATA_LIFEEXPECTANCY_M )
+		curdata = ltmale;
+	else if( datatype == DATA_LIFEEXPECTANCY_F )
+		curdata = ltfemale;
+	else if( datatype == DATA_LIFEEXPECTANCY_T )
+		curdata = ltboth;
+	
+	// Gather the data.
+	for( var country in countries ) {
+		retdata["data"][countries[country]] = { "data":[], "err":[] };
+		retdata["data"][countries[country]]["data"].push( [] );
+		
+		// Add empty data for all of the ages.
+		for( var age = ages[0]; age <= ages[1]; age++ )
+			retdata["data"][countries[country]]["data"][0].push( [ age, 0 ] );
+		
+		var total = 0;
+		for( var year = years[0]; year <= years[1]; year++ )
+			if( ""+year in curdata[countries[country]] ) {
+				total++;
+				for( var age = ages[0]; age <= ages[1]; age++ )
+					retdata["data"][countries[country]]["data"][0][age-ages[0]] += genderFilteredData( curdata[year][age], gender, maleloc, femaleloc );
+			}
+	}
+	
+	return retdata;
+}
+
 // Combine two single data sets into one, making it an area set.
 function areaCombineS( data1, data2, key, combine )
 {
@@ -158,18 +200,6 @@ function areaCombine( data1, data2, key, combine )
 		
 	return newData;
 }
-
-// Old method of showing exaggerated data.
-/*function addWidths( data1, data2 )
-{
-	for( var key in data1["data"] )
-		for( var elem in data1["data"][key] ) {
-			var expand = data2["data"][key][elem][1] / 2 * 10;
-			var orig = data1["data"][key][elem][1];
-			data1["data"][key][elem][1] = orig - expand;
-			data1["data"][key][elem].push( orig + expand );
-		}
-}*/
 
 // Adds the graph to the page.
 function addGraph( id, margin, width, height, xrange, yrange, xdomain, ydomain, xticks, yticks )
