@@ -87,7 +87,8 @@ function addHelp()
 		[ "#filterHelp",		"Select the specific filters to apply to the data.",										"left center",		"right center" ],
 		[ "#eventHelp",			"Select the events to display data for.",													"left center",		"right center" ],
 		[ "#versionHelp",		"Select the version of the vis to display. Please change these based on the survey.",		"left center",		"right center" ],
-		[ "#helpIcon",			"Help will popup in these tooltips!",														"bottom center",	"top center" ]
+		[ "#helpIcon",			"Help will popup in these tooltips!",														"bottom center",	"top center" ],
+		[ "#axisHelp",			"Select which x-axis to use.",																"left center",		"right center" ]
 	];
 	
 	for( var h in helps )
@@ -184,9 +185,28 @@ function addSelectedEvents( curdata, maxy )
 	}).get();
 	
 	for( e in selectedEvents ) {
-		curdata["events"].push( { "num": selectedEvents[e],"data":[ [ events[selectedEvents[e]][1], 0, maxy ], [ events[selectedEvents[e]][2], 0, maxy ] ] } );
+		var start = events[selectedEvents[e]][1];
+		var end = events[selectedEvents[e]][2];
+		
+		if( start == end ) {
+			start -= .5;
+			end += .5;
+		}
+		
+		curdata["events"].push( { "num": selectedEvents[e],"data":[ [ start, 0, maxy ], [ end, 0, maxy ] ] } );
 		addEvent( curdata["events"][curdata["events"].length-1], graph, overview );
 	}
+}
+
+// Ensure sliders don't have the same value when they are the y-axis.
+function fixSliders( slider ) {
+	var values = $( "#"+slider ).slider( "option", "values" );
+	if( values[0] == values[1] )
+		$( "#"+slider ).slider( "values", [ values[0], values[1] + 1 ] );
+		
+	values = $( "#"+slider ).slider( "option", "values" );
+	if( values[0] == values[1] )
+		$( "#"+slider ).slider( "value", $(this).val() - 1 );
 }
 
 // Fills out all of the controls.
@@ -215,13 +235,19 @@ function fillControls()
 	
 	$( "#yearsselected" ).html( "Years [1800-2020]:" );
 	$( "#slider-year" ).slider({
-      range: true,
-      min: 1800,
-      max: 2020,
-      values: [ 1800, 2020 ],
-      slide: function( event, ui ) {
-		$( "#yearsselected" ).html( "Years [" + ui.values[0] + "-" + ui.values[1] + "]:" );
-      }
+		range: true,
+		min: 1800,
+		max: 2020,
+		values: [ 1800, 2020 ],
+		slide: function( event, ui ) {
+			if( $( "#axislist input[type='radio']:checked" ).val() == AXIS_YEAR )
+				fixSliders( ui.values );
+
+			$( "#yearsselected" ).html( "Years [" + ui.values[0] + "-" + ui.values[1] + "]:" );
+
+			years = ui.values;
+			fillVis();
+		}
     });
 	
 	$( "#agesselected" ).html( "Ages [0-110+]:" );
@@ -231,7 +257,11 @@ function fillControls()
       max: 110,
       values: [ 0, 110 ],
       slide: function( event, ui ) {
+		if( $( "#axislist input[type='radio']:checked" ).val() == AXIS_AGE )
+			fixSliders( ui.values );
+	  
 		$( "#agesselected" ).html( ( "Ages [" + ui.values[0] + "-" + ui.values[1] + "]:" ).replace( "110", "110+" ) );
+		ages = ui.values;
 		fillVis();
       }
     });
@@ -263,6 +293,26 @@ function fillControls()
 	$('#versionlist input:radio').change(
 		function(){
 			hqbox = ( "#hoverquery" + $( "#versionlist input[type='radio']:checked" ).val() ).replace( "1", "" );
+			fillVis();
+		} );
+		
+	$('#axislist input:radio').change(
+		function(){
+			var axisval = $( "#axislist input[type='radio']:checked" ).val();
+			if( axisval == AXIS_AGE ) {
+				var viewval = $( "#viewlist input[type='radio']:checked" ).val();
+				
+				if( viewval == VIEW_BIRTHS || viewval == VIEW_BANDD )
+					$( "#viewselect_" + VIEW_DEATHS ).attr( "checked", true );
+			
+				$( "#viewselectdiv" + VIEW_BIRTHS ).css( "display", "none" );
+				$( "#viewselectdiv" + VIEW_BANDD ).css( "display", "none" );
+			}
+			else {
+				$( "#viewselectdiv" + VIEW_BIRTHS ).css( "display", "" );
+				$( "#viewselectdiv" + VIEW_BANDD ).css( "display", "" );
+			}
+				
 			fillVis();
 		} );
 }
@@ -301,8 +351,18 @@ function addTitleText( graph, view, selectedCountries, ages )
 		.attr( "fill", "black" )
 		.attr( "opacity", .25 )
 		.attr( "font-size", separationHeight-1+"px" )
-		.attr( "font-weight", "500" )
 		.attr( "font-family", titlefont );
+		
+	/*graph["svg"].append( "text" )
+		.text( "__ is missing data for this year range" )
+		.attr( "id", "titleerror" )
+		.attr( "class", "titletext" )
+		.attr( "x", 10 )
+		.attr( "y", separationHeight * 4 )
+		.attr( "fill", "red" )
+		.attr( "opacity", .25 )
+		.attr( "font-size", separationHeight-1+"px" )
+		.attr( "font-family", titlefont );*/
 		
 	$( "#titlefilter" ).html( ( "For Ages " + ages[0] + " - " + ages[1] ).replace( "110", "110+" ) );
 }

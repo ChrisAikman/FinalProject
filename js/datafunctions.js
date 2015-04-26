@@ -55,6 +55,11 @@ function valFilteredData( dat, val )
 	return total;
 }
 
+function valFilteredAgeData( dat, val )
+{
+	return dat[val];
+}
+
 function genSpecificYearData( datatype, country, year, gender, ages )
 {
 	if( datatype == DATA_BIRTHS )
@@ -71,6 +76,27 @@ function genSpecificYearData( datatype, country, year, gender, ages )
 		return [ year, valFilteredData( ltboth[country][year], 1, ages ) ];
 	//if( datatype == DATA_DEATHRATE )
 		//return [ year, genderFilteredAgeData( deathrates[country][year], gender, GENDER_MALE, GENDER_FEMALE, ages ) ];
+}
+
+function genSpecificAgeData( datatype, country, year, gender, age )
+{
+	if( datatype == DATA_BIRTHS )
+		if( age == 0 )
+			return genderFilteredData( births[country][year], gender, GENDER_MALE, GENDER_FEMALE );
+		else
+			return 0;
+	if( datatype == DATA_DEATHS )
+		return genderFilteredData( deaths[country][year][age], gender, GENDER_MALE, GENDER_FEMALE );
+	if( datatype == DATA_POPULATION )
+		return genderFilteredData( populations[country][year][age], gender, GENDER_MALE, GENDER_FEMALE );
+	if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_MALE )
+		return valFilteredAgeData( ltmale[country][year][age], 1 );
+	if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_FEMALE )
+		return valFilteredAgeData( ltfemale[country][year][age], 1 );
+	if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_TOTAL )
+		return valFilteredAgeData( ltboth[country][year][age], 1 );
+
+	genderFilteredData( curdata[countries[country]][year][age], gender, GENDER_MALE, GENDER_FEMALE );
 }
 
 function genYearData( datatype, countries, years, gender, ages )
@@ -148,11 +174,11 @@ function genAgeData( datatype, countries, years, gender, ages )
 		curdata = deaths;
 	else if( datatype == DATA_POPULATION )
 		curdata = populations;
-	else if( datatype == DATA_LIFEEXPECTANCY_M )
+	else if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_MALE )
 		curdata = ltmale;
-	else if( datatype == DATA_LIFEEXPECTANCY_F )
+	else if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_FEMALE )
 		curdata = ltfemale;
-	else if( datatype == DATA_LIFEEXPECTANCY_T )
+	else if( datatype == DATA_LIFEEXPECTANCY && gender == GENDER_TOTAL )
 		curdata = ltboth;
 	
 	// Gather the data.
@@ -169,8 +195,13 @@ function genAgeData( datatype, countries, years, gender, ages )
 			if( ""+year in curdata[countries[country]] ) {
 				total++;
 				for( var age = ages[0]; age <= ages[1]; age++ )
-					retdata["data"][countries[country]]["data"][0][age-ages[0]] += genderFilteredData( curdata[year][age], gender, maleloc, femaleloc );
+					if( age in curdata[countries[country]][year] )
+						retdata["data"][countries[country]]["data"][0][age-ages[0]][1] += genSpecificAgeData( datatype, countries[country], year, gender, age );
 			}
+			
+		if( datatype == DATA_LIFEEXPECTANCY || datatype == DATA_DEATHS || datatype == DATA_POPULATION )
+			for( var age = ages[0]; age <= ages[1]; age++ )
+				retdata["data"][countries[country]]["data"][0][age-ages[0]][1] /= total;
 	}
 	
 	return retdata;
@@ -262,8 +293,6 @@ function baseOnMouseOver( currentC )
 {
 	var otherlines = $( '.area, .line' ).not( $( "." + currentC ) );
 	d3.selectAll( otherlines ).transition().style( "opacity", datafade );
-	
-	// ADD HERE ALL OTHERS! MAYBE JUST ADD NEW CLASS TO ALL, NOT JUST AREA AND LINE, ETC?
 }
 
 function onMouseOver( obj, data, graph ) {
@@ -317,12 +346,10 @@ function addData( data, graph, graph2 )
 		}
 		
 		// Draw the errors if the correct version is selected.
-		if( $( "#versionlist input[type='radio']:checked" ).val() == "1" )
+		//if( $( "#versionlist input[type='radio']:checked" ).val() == "1" )
 			for( var e in data["data"][c]["err"] )
 				addError( data["data"][c]["err"][e], graph, graph2, c, data["draw"], data["type"], data["name"], e )
 	}
-		
-	
 }
 
 function addEvent( data, graph, graph2 )

@@ -19,14 +19,14 @@ var GENDER_BOTH		= 3;
 
 // Datasets
 var datasets = [
-	[ "datasets/births.json", "BIRTHS" ],
-	[ "datasets/populations.json", "POPULATIONS" ],
-	[ "datasets/deaths.json", "DEATHS" ],
-	[ "datasets/deathrates.json", "DEATH RATES" ],
-	[ "datasets/ltboth.json", "LIFETIME EXPECTANCIES" ],
-	[ "datasets/ltfemale.json", "MALE LIFETIME EXPECTANCIES" ],
-	[ "datasets/ltmale.json", "FEMALE LIFETIME EXPECTANCIES" ],
-	[ "datasets/events.json", "EVENTS" ]
+	[ "datasets/births.json",		"BIRTHS" ],
+	[ "datasets/populations.json",	"POPULATIONS" ],
+	[ "datasets/deaths.json",		"DEATHS" ],
+	[ "datasets/deathrates.json",	"DEATH RATES" ],
+	[ "datasets/ltboth.json",		"LIFETIME EXPECTANCIES" ],
+	[ "datasets/ltfemale.json",		"MALE LIFETIME EXPECTANCIES" ],
+	[ "datasets/ltmale.json",		"FEMALE LIFETIME EXPECTANCIES" ],
+	[ "datasets/events.json",		"EVENTS" ]
 	];
 
 var colors = {
@@ -102,3 +102,7 @@ var views = [
 	[ "Life Expectancy", "" ],
 	[ "Births and Deaths", "checked" ]
 ];
+
+// Axis constants.
+var AXIS_AGE				= 0;
+var AXIS_YEAR				= 1;

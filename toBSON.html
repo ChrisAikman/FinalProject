@@ -10,21 +10,25 @@
 	<script src="datasets/ltfemale.json"></script>
 	<script src="datasets/ltmale.json"></script>
 	<script src="datasets/populations.json"></script>
+	<script src="datasets/events.json"></script>
 </head>
 
 <body onload="start();">
 <script>
 	var ext = ".jzp";
 
-	//var load = [ births, "births" + ext ];
-	//var load = [ deathrates, "deathrates" + ext ];
-	//var load = [ deaths, "deaths" + ext ];
-	//var load = [ ltboth, "ltboth" + ext ];
-	//var load = [ ltfemale, "ltfemale" + ext ];
-	//var load = [ ltmale, "ltmale" + ext ];
-	//var load = [ populations, "populations" + ext ];
+	var load = [
+		//[ births, "births" + ext ],
+		[ deathrates, "deathrates" + ext ],
+		//[ deaths, "deaths" + ext ],
+		//[ ltboth, "ltboth" + ext ],
+		//[ ltfemale, "ltfemale" + ext ],
+		//[ ltmale, "ltmale" + ext ],
+		//[ populations, "populations" + ext ],
+		//[ events, "events" + ext ]
+	]
 	
-	var mortdata = {
+	/*var mortdata = {
 		"births": births,
 		"deathrates": deathrates,
 		"deaths": deaths,
@@ -34,20 +38,13 @@
 		"populations": populations
 	};
 	
-	var load = [ mortdata, "mortdata" + ext ];
+	var load = [ mortdata, "mortdata" + ext ];*/
 	
 	//44 down to 6.8 w/ BSON serialize and compress
 	//24 down to 4.5 w/ JSON stringify and compress
 
 	function start() {
-		//var BSON = bson().BSON;
-
-		// Serialize a document
-		//var data = BSON.serialize(load[0], true, false, false);
-		// De serialize it again
-		//var doc_2 = BSON.deserialize(data);
-		
-		var data = JSON.stringify( load[0] );
+		/*var data = JSON.stringify( load[0] );
 		
 		var string = "This is my compression test.";
 		alert("Size of sample is: " + data.length);
@@ -57,7 +54,15 @@
 
 		//var blob = new Blob([data.buffer]);
 		var blob = new Blob([compressed]);
-		saveAs( blob, load[1] );
+		saveAs( blob, load[1] );*/
+		
+		for( var f in load ) {
+			var data = JSON.stringify( load[f][0] );
+			var compressed = LZString.compress(data);
+			//var blob = new Blob([data.buffer]);
+			var blob = new Blob( [compressed], {type: "text/plain;charset=utf-8"} );
+			saveAs( blob, load[f][1] );
+		}
 	}
 </script>
 </body>

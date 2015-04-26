@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="js/jquery.qtip.min.js"></script>
 	<script type="text/javascript" src="js/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="js/d3.min.js"></script>
+	<script type="text/javascript" src="js/lz-string.min.js"></script>
 	
 	<!-- Vis scripts. -->
 	<script type="text/javascript" src="js/constants.js"></script>
@@ -45,12 +46,22 @@
 					<label for="V2R">V2</label>
 				</div>
 			</div>-->
+			Selected Axis:
+			<div id="axisHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
+			<div id="axislist" class="controlpanelinset" >
+				<div class="controlpanelcountry">
+					<input id="AAR" type="radio" name="versionselect" value="0"/>
+					<label for="AAR">Age</label>
+					<input id="AYR" type="radio" name="versionselect" value="1" checked/>
+					<label for="AYR">Year</label>
+				</div>
+			</div>
 		</div>
 		<div id="filterspanel" class="controlpanel">
 			Selected Filters:
 			<div id="filterHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
 			<div id="filterlist" class="controlpanelinset" >
-				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px; display: none;">
+				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
 					<span id="yearsselected"></span>
 					<div id="slider-year" style="margin:5px; margin-left: 8px; margin-right: 13px;"></div>
 				</div>
@@ -147,6 +158,9 @@ var loadScriptOn = 0;
 var maxy = 0;
 var hqbox = "#hoverquery";
 
+var years = [ 1800, 2020 ];
+var ages = [ 0, 110 ];
+
 function brushed()
 {
 	graph["x"].domain( brush.empty() ? overview["x"].domain() : brush.extent() );
@@ -193,17 +207,26 @@ function generateVis()
       .attr( "height", height2 + 7 );
 }
 
+function fillSpecificData( datatype, axistype, selectedCountries, years, gender, ages ) {
+	if( axistype == AXIS_YEAR )
+		return genYearData( datatype, selectedCountries, years, gender, ages );
+		
+	return genAgeData( datatype, selectedCountries, years, gender, ages );
+}
+
 // Add the data based on filters.
 function fillData( datatype, selectedCountries, years, ages, gender, name, type )
 {
 	var json, json2, json3;
 	
+	var axistype = $( "#axislist input[type='radio']:checked" ).val();
+	
 	if( gender == GENDER_MALE || gender == GENDER_BOTH )
-		json = genYearData( datatype, selectedCountries, years, GENDER_MALE, ages );
+		json = fillSpecificData( datatype, axistype, selectedCountries, years, GENDER_MALE, ages );
 	if( gender == GENDER_FEMALE || gender == GENDER_BOTH )
-		json2 = genYearData( datatype, selectedCountries, years, GENDER_FEMALE, ages );
+		json2 = fillSpecificData( datatype, axistype, selectedCountries, years, GENDER_FEMALE, ages );
 	if( gender == GENDER_TOTAL )
-		json3 = genYearData( datatype, selectedCountries, years, GENDER_TOTAL, ages );
+		json3 = fillSpecificData( datatype, axistype, selectedCountries, years, GENDER_TOTAL, ages );
 
 	var data = {};
 	data["data"] = {};
@@ -243,8 +266,6 @@ function fillVis()
 	
 	var view = $( "#viewlist input[type='radio']:checked" ).val();
 	var gender = $( "#filterlist input[type='radio']:checked" ).val();
-	var years = $( "#slider-year" ).slider( "option", "values" );
-	var ages = $( "#slider-age" ).slider( "option", "values" );
 
 	curdata = { "data":[], "events":[] };
 	
