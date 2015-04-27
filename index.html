@@ -17,8 +17,10 @@
 	<script type="text/javascript" src="js/datafunctions.js"></script>
 	
 	<!-- Style sheets. -->
-	<link type="text/css" href="css/jquery.qtip.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/jquery-ui.min.css" rel="stylesheet" />
+	<link type="text/css" href="css/jquery-ui.structure.min.css" rel="stylesheet" />
+	<link type="text/css" href="css/jquery-ui.theme.min.css" rel="stylesheet" />
+	<link type="text/css" href="css/jquery.qtip.min.css" rel="stylesheet" />
 	<link type="text/css" href="css/style.css" rel="stylesheet" />
 </HEAD>
 
@@ -31,6 +33,16 @@
 			Selected Countries:
 			<div id="countryHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
 			<div id="countrylist" class="controlpanelinset" ></div>
+			Color Palette:
+			<div id="paletteHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
+			<div id="palettelist" class="controlpanelinset" >
+				<div class="controlpanelcountry">
+					<input id="CPS" type="radio" name="paletteselect" value="standard" checked/>
+					<label for="CPS">Standard</label>
+					<input id="CPC" type="radio" name="paletteselect" value="colorblind"/>
+					<label for="CPC">Colorblind</label>
+				</div>
+			</div>
 		</div>
 		<div id="viewpanel" class="controlpanel">
 			Selected View:
@@ -75,7 +87,11 @@
 		<div id="eventpanel" class="controlpanel">
 			Selected Events:
 			<div id="eventHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
-			<div id="eventlist" class="controlpanelinset" ></div>
+			<div id="eventbutton" class="controlpanelinset" >
+				<a href="#" onclick="showEventsList();"><div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
+					Launch Event List
+				</div></a>
+			</div>
 		</div>
 	</div>
 	
@@ -132,12 +148,21 @@
 		<img src="css/images/VisThumb.png"></img>
 	</div>
 	<p>
-		Human mortality is a topic that has been of interest throughout history. Since the beginning of the scientific age, great efforts have been made to extend the average lifespan and reduce risk of death. A major contributing factor to changes in birth and death rates is historic events. Wars, diseases and scientific breakthroughs have all contributed to changes in population.  The goal of this project is to use past mortality and population data to make connections between lifespan, population growth and historical events.
+		Human mortality is a topic that has been studied throughout history. Since the beginning of the scientific age, great efforts have been made to extend the average lifespan and reduce risk of death. A major contributing factor to changes in birth and death rates is historic events. Wars, diseases and scientific breakthroughs have all contributed to significant changes in population. The goal of this project is to use past mortality and population data to make connections between lifespan, population growth, and historical events.
 	</p>
 	<div id="introloading">LOADING...</div>
 	<BR><BR>
-	<div class="introhelp">Hover over the <img id="helpIcon" src="css/images/help.png"/> buttons to receive help at any time.</div>
-	
+	<div class="introhelp">Hover over the <a id="interactivelink" href="#"><img id="helpIcon" src="css/images/help.png"/></a> buttons to receive help at any time.</div>
+</div>
+
+<div id="eventlist" style="display: none;" title="Events List"></div>
+
+<div id="featurebox" style="display: none;">
+	HELLO
+</div>
+
+<div id="featurenext" style="display: none;">
+	<a href="#" onclick="interactiveWalkthrough();">NEXT</a>
 </div>
 
 <script type="text/javascript">
@@ -157,8 +182,9 @@ var curdata;
 var loadScriptOn = 0;
 var maxy = 0;
 var hqbox = "#hoverquery";
+var colorpalette = "standard";
 
-var years = [ 1800, 2020 ];
+var years = [ 1806, 2013 ];
 var ages = [ 0, 110 ];
 
 function brushed()

@@ -295,20 +295,31 @@ function baseOnMouseOver( currentC )
 	d3.selectAll( otherlines ).transition().style( "opacity", datafade );
 }
 
-function onMouseOver( obj, data, graph ) {
-	var currentC = d3.select( obj ).attr( "dataname" );
-	baseOnMouseOver( currentC );
-	
-	d3.select( obj ).moveToFront();
+function onMouseOver( obj, data, graph, hide ) {
+	if( hide === undefined )
+		hide = true;
+
+	if( hide ) {
+		var currentC = d3.select( obj ).attr( "dataname" );
+		baseOnMouseOver( currentC );
+		
+		d3.select( obj ).moveToFront();
+	}
 	
 	$( hqbox ).css( "display", "" );
 	updateHoverQuery( obj, data, graph );
 }
 
-function onMouseOut( obj ){
+function onMouseOut( obj, hide ){
+	if( hide === undefined )
+		hide = true;
+
 	$( hqbox ).css( "display", "none" );
-	var otherlines = $( '.area, .line' ).not( obj );
-	d3.selectAll( otherlines ).transition().style( "opacity", datanormal );
+	
+	if( hide ) {
+		var otherlines = $( '.area, .line' ).not( obj );
+		d3.selectAll( otherlines ).transition().style( "opacity", datanormal );
+	}
 }
 
 function addData( data, graph, graph2 )
@@ -319,15 +330,20 @@ function addData( data, graph, graph2 )
 		classn = "line";
 	if( data["draw"] == "valuearea" ) {
 		classn = "area";
-		pathtype = "fill"
+		pathtype = "fill";
+		strokecolor = "black";
 	}
 
 	for( var c in data["data"] ) {
 		for( var nd in data["data"][c]["data"] ) {
+			if( data["draw"] == "valueline" )
+				strokecolor = colors[colorpalette][c];
+		
 			graph["svg"].append("path")
 				.attr( "class", classn + " " + c + " " + c + data["name"] + nd )
-				.style( pathtype, colors[c] )
-				.style( "stroke", colors[c] )
+				.style( pathtype, colors[colorpalette][c] )
+				.style( "stroke", strokecolor )
+				.style( "opacity", datanormal )
 				.attr( "d", graph[data["draw"]]( data["data"][c]["data"][nd], graph["x"] ) )
 				.attr( "dataname", c )
 				.attr( "datanum", nd )
@@ -339,8 +355,9 @@ function addData( data, graph, graph2 )
 				
 			graph2["svg"].append("path")
 				.attr( "class", classn + " overview" + classn + " " + c )
-				.style( pathtype, colors[c] )
-				.style( "stroke", colors[c] )
+				.style( pathtype, colors[colorpalette][c] )
+				.style( "opacity", datanormal )
+				.style( "stroke", colors[colorpalette][c] )
 				.attr( "d", graph2[data["draw"]]( data["data"][c]["data"][nd], graph2["x"] ) )
 				.attr( "dataname", c );
 		}
@@ -356,20 +373,17 @@ function addEvent( data, graph, graph2 )
 {
 	graph["svg"].append("path")
 		.attr( "class", "area " + " event " + "event" + data["num"] )
-		.style( "fill", colors["Event"] )
+		.style( "fill", colors[colorpalette]["Event"] )
 		.attr( "d", graph["valuearea"]( data["data"], graph["x"] ) )
-		//.attr( "eventname", c )
+		.attr( "datatype", "V" )
 		.attr( "clip-path", "url(#clip)" )
-		.on( "mouseover",
-		function( d ){ ; } )
-		.on( "mouseout",
-		function( d ){ ; } )
-		.on( "mousemove",
-		function( d ){ ; } );
+		.on( "mouseover", function( d ){ onMouseOver( this, data, graph, false ); } )
+		.on( "mouseout", function( d ){ onMouseOut( this ); } )
+		.on( "mousemove", function( d ){ updateHoverQuery( this, data, graph, false ); } );
 		
 	graph2["svg"].append("path")
 		.attr( "class", "area event" )
-		.style( "fill", colors["Event"] )
+		.style( "fill", colors[colorpalette]["Event"] )
 		.attr( "d", graph2["valuearea"]( data["data"], graph2["x"] ) );
 }
 
@@ -377,7 +391,7 @@ function addError( data, graph, graph2, c, drawtype, datatype, dataname, err )
 {
 	graph["svg"].append("path")
 		.attr( "class", "line error " + c + " err" + c + dataname + err )
-		.style( "stroke", colors[c] )
+		.style( "stroke", colors[colorpalette][c] )
 		.style( "fill", "white" )
 		.attr( "d", graph[drawtype]( data, graph["x"] ) )
 		.attr( "dataname", c )
@@ -390,7 +404,7 @@ function addError( data, graph, graph2, c, drawtype, datatype, dataname, err )
 		
 	graph2["svg"].append("path")
 		.attr( "class", "line overview error " + c )
-		.style( "stroke", colors[c] )
+		.style( "stroke", colors[colorpalette][c] )
 		.style( "fill", "white" )
 		.attr( "d", graph2[drawtype]( data, graph2["x"] ) )
 		.attr( "dataname", c );

@@ -28,16 +28,28 @@ var datasets = [
 	[ "datasets/ltmale.json",		"FEMALE LIFETIME EXPECTANCIES" ],
 	[ "datasets/events.json",		"EVENTS" ]
 	];
-
+	
 var colors = {
-	"USA": "blue",
-	"JPN": "red",
-	"DEUTNP": "green",
-	"ESP": "yellow",
-	"GBR_NP": "orange",
-	"RUS": "purple",
-	"FRATNP": "black",
-	"Event": "gray"
+	"standard": {
+		"USA": "blue",
+		"JPN": "red",
+		"DEUTNP": "green",
+		"ESP": "yellow",
+		"GBR_NP": "orange",
+		"RUS": "purple",
+		"FRATNP": "black",
+		"Event": "gray"
+	},
+	"colorblind": {
+		"USA": "#3366AA",
+		"JPN": "#EE3333",
+		"DEUTNP": "#CCCC55",
+		"ESP": "#EE7722",
+		"GBR_NP": "#11AA99",
+		"RUS": "#992288",
+		"FRATNP": "#777777",
+		"Event": "gray"
+	}
 	};
 
 var countries = {

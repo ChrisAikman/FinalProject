@@ -1,8 +1,9 @@
-http://pixabay.com/en/help-info-question-questionmark-147419/
+DONE	http://pixabay.com/en/help-info-question-questionmark-147419/
 
-http://qtip2.com/
+DONE	http://qtip2.com/
 
-https://www.murvey.com/
+DONE	https://www.murvey.com/
 
-http://www.smashingmagazine.com/2010/04/15/the-ultimate-free-web-designer-s-icon-set-750-icons-incl-psd-sources/
+DONE	http://www.smashingmagazine.com/2010/04/15/the-ultimate-free-web-designer-s-icon-set-750-icons-incl-psd-sources/
 
+DONE	http://www.sron.nl/~pault/

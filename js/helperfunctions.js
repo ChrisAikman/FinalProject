@@ -50,7 +50,7 @@ function removeIntroBox()
 	$( "#introbox" ).animate({
 		opacity: 0.0,
 		}, 500, function() {
-			$( "#introbox" ).html( "" );
+			$( "#introbox" ).html( "" ).css( "display", "none" );
 	});
 	
 	$( "#fadebox" ).animate({
@@ -71,6 +71,7 @@ function loadScripts()
 			loadScripts();
 		else {
 			$( "#introloading" ).html( "<div class=\"loadingbutton\" onclick=\"removeIntroBox();\">LOADING COMPLETE CLICK TO CONTINUE</div>" );
+			$( "#interactivelink" ).click( function(){ removeIntroBox(); interactiveWalkthrough(); } );
 			fillControls();
 			generateVis();
 			fillVis();
@@ -85,10 +86,11 @@ function addHelp()
 		[ "#countryHelp",		"Select the countries to display data for.",												"left center",		"right center" ],
 		[ "#viewHelp",			"Select which view to show.",																"left center",		"right center" ],
 		[ "#filterHelp",		"Select the specific filters to apply to the data.",										"left center",		"right center" ],
-		[ "#eventHelp",			"Select the events to display data for.",													"left center",		"right center" ],
+		[ "#eventHelp",			"Opens a window to select the events to display data for.",									"left center",		"right center" ],
 		[ "#versionHelp",		"Select the version of the vis to display. Please change these based on the survey.",		"left center",		"right center" ],
 		[ "#helpIcon",			"Help will popup in these tooltips!",														"bottom center",	"top center" ],
-		[ "#axisHelp",			"Select which x-axis to use.",																"left center",		"right center" ]
+		[ "#axisHelp",			"Select which x-axis to use.",																"left center",		"right center" ],
+		[ "#paletteHelp",		"Change the colore palette.",																"left center",		"right center" ]
 	];
 	
 	for( var h in helps )
@@ -121,39 +123,50 @@ function updateHoverQuery( sel, da, graph )
 	$( hqbox ).css( "top", ""+top );
 	
 	// Update data.
-	$( ".hqcountryname" ).html( countries[ d3.select( sel ).attr( "dataname" ) ] );
+	
 	var type = d3.select( sel ).attr( "datatype" );
 	var dnum = d3.select( sel ).attr( "datanum" );
-	$( ".hqimg" ).attr( "src", "css/images/flag_" + d3.select( sel ).attr( "dataname" ) + ".png" );
 	
-	if( type[0] != "E" ) {
-		var dat = da["data"][d3.select( sel ).attr( "dataname" )]["data"][dnum];
-		var x0 = graph["x"].invert( d3.mouse(sel)[0] );
-		var i = bisectData( dat, x0 );
-		var d0 = dat[i - 1];
-		var d1 = dat[i];
-		
-		if( d0 == undefined )
-			d0 = d1;
-		if( d1 == undefined )
-			d1 = d0;
-		
-		var d = x0 - d0[0] > d1[0] - x0 ? d1 : d0;
-		
-		$( ".hqyear" ).html( d[0] );
-		if( type[1] == "M" )
-			$( ".hqdata" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
-		else if( type[1] == "F" )
-			$( ".hqdata" ).html( "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
-		else if( type[1] == "T" )
-			$( ".hqdata" ).html( "Total " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
-		else if( type[1] == "B" )
-			$( ".hqdata" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) + "<BR>" + "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[2] ) ) );
+	if( type[0] == "V" ) {
+		$( ".hqimg" ).css( "display", "none" );
+		$( ".hqcountryname" ).html( events[da["num"]][0] );
+		$( ".hqdata" ).css( "display", "none" );
+		$( ".hqyear" ).css( "display", "none" );
 	}
 	else {
-		$( ".hqdata" ).html( "Missing data." );
-		$( ".hqyear" ).html( Math.round( graph["x"].invert( d3.mouse(sel)[0] ) ) );
+		$( ".hqcountryname" ).html( countries[ d3.select( sel ).attr( "dataname" ) ] );
+		$( ".hqimg" ).css( "display", "" ).attr( "src", "css/images/flag_" + d3.select( sel ).attr( "dataname" ) + ".png" );
+	
+		if( type[0] == "E" ) {
+			$( ".hqdata" ).css( "display", "" ).html( "Missing data." );
+			$( ".hqyear" ).css( "display", "" ).html( Math.round( graph["x"].invert( d3.mouse(sel)[0] ) ) );
+		}
+		else {
+			var dat = da["data"][d3.select( sel ).attr( "dataname" )]["data"][dnum];
+			var x0 = graph["x"].invert( d3.mouse(sel)[0] );
+			var i = bisectData( dat, x0 );
+			var d0 = dat[i - 1];
+			var d1 = dat[i];
+			
+			if( d0 == undefined )
+				d0 = d1;
+			if( d1 == undefined )
+				d1 = d0;
+			
+			var d = x0 - d0[0] > d1[0] - x0 ? d1 : d0;
+			
+			$( ".hqyear" ).html( d[0] );
+			if( type[1] == "M" )
+				$( ".hqdata" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
+			else if( type[1] == "F" )
+				$( ".hqdata" ).html( "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
+			else if( type[1] == "T" )
+				$( ".hqdata" ).html( "Total " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) );
+			else if( type[1] == "B" )
+				$( ".hqdata" ).html( "Male " + dataName[type[0]] + ": " + addCommas( Math.round( d[1] ) ) + "<BR>" + "Female " + dataName[type[0]] + ": " + addCommas( Math.round( d[2] ) ) );
+		}
 	}
+	
 }
 
 // Fills the events panel with events that involve currently selected years and countries.
@@ -167,7 +180,8 @@ function fillEvents()
 		$( "#eventselectdiv" + e ).append( "<label id=\"countrylabel_" + e + "\" for=\"eventselect_" + e + "\">" + events[e][0] + "</label>" );
 		$( "#eventselectdiv" + e ).append( "<div style=\"clear: both;\"></div>" );
 		
-		$( "#eventselectdiv" + e ).qtip( { content: { text: "THIS WILL CONTAIN INFO ON THE EVENT." }, style: { classes: "qtip-dark" }, position: { my: 'left center', at: 'right center' }, show: { delay: 0 } } )
+		// Not enough time :(
+		//$( "#eventselectdiv" + e ).qtip( { content: { text: "THIS WILL CONTAIN INFO ON THE EVENT." }, style: { classes: "qtip-dark" }, position: { my: 'left center', at: 'right center' }, show: { delay: 0 } } )
 	}
 	
 	// Add click events.
@@ -219,9 +233,12 @@ function fillControls()
 		var cw = $( "#countryselect_" + c ).width();
 		
 		$( "#countryselectdiv_" + c ).append( "<label id=\"countrylabel_" + c + "\" for=\"countryselect_" + c + "\"><img id=\"countryimage_" + c + "\" height=\"" + cw + "px\" src=\"css/images/flag_" + c + ".png\" />" + countries[c] + "</label>" );
-		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + colors[c] + "; color: " + colors[c] + ";\"></div>" );
+		$( "#countryselectdiv_" + c ).append( "<div id=\"countrycolor_" + c + "\" class=\"countrycolor\" style=\"float: right; width:" + cw + "px; height:" + cw + "px; background-color: " + colors[colorpalette][c] + "; color: " + colors[colorpalette][c] + ";\"></div>" );
 		$( "#countryselectdiv_" + c ).append( "<div style=\"clear: both;\"></div>" );
 	}
+	
+	// Add select all or none.
+	$( "#countrylist" ).append( "<div class=\"controlpanelcountry\" style=\"padding-left: 3px; padding-right: 3px;\"><div style=\"float: left;\"><a href=\"#\" onclick=\"selectAllCountries();\">Select All</a></div><div style=\"float: right;\"><a href=\"#\" onclick=\"clearAllCountries();\">Select None</a></div><div style=\"clear: both;\"></div></div>" );
 		
 	fillEvents();
 	
@@ -233,15 +250,15 @@ function fillControls()
 		$( "#viewselectdiv" + v ).append( "<div style=\"clear: both;\"></div>" );
 	}
 	
-	$( "#yearsselected" ).html( "Years [1800-2020]:" );
+	$( "#yearsselected" ).html( "Years ["+years[0]+"-"+years[1]+"]:" );
 	$( "#slider-year" ).slider({
 		range: true,
-		min: 1800,
-		max: 2020,
-		values: [ 1800, 2020 ],
+		min: years[0],
+		max: years[1],
+		values: years,
 		slide: function( event, ui ) {
 			if( $( "#axislist input[type='radio']:checked" ).val() == AXIS_YEAR )
-				fixSliders( ui.values );
+				fixSliders( "slider-year" );
 
 			$( "#yearsselected" ).html( "Years [" + ui.values[0] + "-" + ui.values[1] + "]:" );
 
@@ -258,7 +275,7 @@ function fillControls()
       values: [ 0, 110 ],
       slide: function( event, ui ) {
 		if( $( "#axislist input[type='radio']:checked" ).val() == AXIS_AGE )
-			fixSliders( ui.values );
+			fixSliders( "slider-age" );
 	  
 		$( "#agesselected" ).html( ( "Ages [" + ui.values[0] + "-" + ui.values[1] + "]:" ).replace( "110", "110+" ) );
 		ages = ui.values;
@@ -296,6 +313,18 @@ function fillControls()
 			fillVis();
 		} );
 		
+	$('#palettelist input:radio').change(
+		function(){
+			colorpalette = $( "#palettelist input[type='radio']:checked" ).val()
+			
+			if( colorpalette == "colorblind" )
+				datanormal = .7;
+			else
+				datanormal = .5;
+			
+			fillVis();
+		} );
+		
 	$('#axislist input:radio').change(
 		function(){
 			var axisval = $( "#axislist input[type='radio']:checked" ).val();
@@ -303,7 +332,7 @@ function fillControls()
 				var viewval = $( "#viewlist input[type='radio']:checked" ).val();
 				
 				if( viewval == VIEW_BIRTHS || viewval == VIEW_BANDD )
-					$( "#viewselect_" + VIEW_DEATHS ).attr( "checked", true );
+					$( "#viewselect_" + VIEW_DEATHS ).prop( "checked", true );
 			
 				$( "#viewselectdiv" + VIEW_BIRTHS ).css( "display", "none" );
 				$( "#viewselectdiv" + VIEW_BANDD ).css( "display", "none" );
@@ -315,6 +344,8 @@ function fillControls()
 				
 			fillVis();
 		} );
+		
+		$( "#eventlist" ).dialog( {autoOpen: false} );
 }
 
 function addTitleText( graph, view, selectedCountries, ages )
@@ -330,8 +361,6 @@ function addTitleText( graph, view, selectedCountries, ages )
 		.attr( "opacity", .25 )
 		.attr( "font-size", separationHeight+"px" )
 		.attr( "font-family", titlefont );
-		
-	$( "#vistitle" ).html( views[ view ][0] );
 	
 	for( c in selectedCountries )
 		graph["svg"].append( "image" )
@@ -353,6 +382,7 @@ function addTitleText( graph, view, selectedCountries, ages )
 		.attr( "font-size", separationHeight-1+"px" )
 		.attr( "font-family", titlefont );
 		
+	// Not enough time! :(
 	/*graph["svg"].append( "text" )
 		.text( "__ is missing data for this year range" )
 		.attr( "id", "titleerror" )
@@ -364,5 +394,59 @@ function addTitleText( graph, view, selectedCountries, ages )
 		.attr( "font-size", separationHeight-1+"px" )
 		.attr( "font-family", titlefont );*/
 		
-	$( "#titlefilter" ).html( ( "For Ages " + ages[0] + " - " + ages[1] ).replace( "110", "110+" ) );
+	if( $( "#axislist input[type='radio']:checked" ).val() == AXIS_YEAR ) {
+		$( "#vistitle" ).html( views[ view ][0] );
+		$( "#titlefilter" ).html( ( "For Ages " + ages[0] + " - " + ages[1] ).replace( "110", "110+" ) );
+	}
+	else {
+		$( "#vistitle" ).html( "Average " + views[ view ][0] );
+		$( "#titlefilter" ).html( ( "For Years " + years[0] + " - " + years[1] ) );
+	}
+}
+
+function selectAllCountries()
+{
+	$('#countrylist input:checkbox').prop( "checked", true );
+	fillVis();
+}
+
+function clearAllCountries()
+{
+	$('#countrylist input:checkbox').prop( "checked", false );
+	fillVis();
+}
+
+function showEventsList()
+{
+	$( "#eventlist" ).dialog( "open" );
+}
+
+var highlightIsActive = false;
+var $highlightedElement = $();
+
+// HIGHLIGHT HELPERS
+function activateHighlight( $element ) {
+	$highlightedElement = $element;
+	highlightIsActive = true;
+	$highlightedElement.addClass( "highlight" );
+}
+
+function deactivateHighlight() {
+	$highlightedElement.removeClass( "highlight" );
+	$highlightedElement = $();
+	highlightIsActive = false;
+}
+
+var walkon = 0;
+function interactiveWalkthrough()
+{
+	deactivateHighlight();
+	
+	if( walkon == 0 )
+		activateHighlight( $( "#vis" ) );
+	
+	if( walkon == 1 )
+		activateHighlight( $( "hoverquery" ) );
+	
+	walkon++;
 }
