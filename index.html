@@ -73,11 +73,11 @@
 			Selected Filters:
 			<div id="filterHelp" class="helpbutton" style="float: right; margin-right: 2px;"><img src="css/images/help.png"/></div>
 			<div id="filterlist" class="controlpanelinset" >
-				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
+				<div id="yearfilterdiv" class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
 					<span id="yearsselected"></span>
 					<div id="slider-year" style="margin:5px; margin-left: 8px; margin-right: 13px;"></div>
 				</div>
-				<div class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
+				<div id="agefilterdiv" class="controlpanelcountry" style="padding-left: 3px; padding-top: 3px;">
 					<span id="agesselected"></span>
 					<div id="slider-age" style="margin:5px; margin-left: 8px; margin-right: 13px;"></div>
 				</div>
@@ -152,7 +152,7 @@
 	</p>
 	<div id="introloading">LOADING...</div>
 	<BR><BR>
-	<div class="introhelp">Hover over the <a id="interactivelink" href="#"><img id="helpIcon" src="css/images/help.png"/></a> buttons to receive help at any time.</div>
+	<div class="introhelp">Hover over the <a id="interactivelink" href="#"><img id="helpIcon" src="css/images/help.png"/></a><a id="interactivelink2" href="#"><img id="helpIcon2" src="css/images/help.png"/></a> buttons to receive help at any time.</div>
 </div>
 
 <div id="eventlist" style="display: none;" title="Events List"></div>
@@ -162,7 +162,7 @@
 </div>
 
 <div id="featurenext" style="display: none;">
-	<a href="#" onclick="interactiveWalkthrough();">NEXT</a>
+	<a id="walkthroughnext" href="#">NEXT</a>
 </div>
 
 <script type="text/javascript">

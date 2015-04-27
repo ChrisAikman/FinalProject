@@ -71,7 +71,8 @@ function loadScripts()
 			loadScripts();
 		else {
 			$( "#introloading" ).html( "<div class=\"loadingbutton\" onclick=\"removeIntroBox();\">LOADING COMPLETE CLICK TO CONTINUE</div>" );
-			$( "#interactivelink" ).click( function(){ removeIntroBox(); interactiveWalkthrough(); } );
+			$( "#interactivelink" ).click( function(){ removeIntroBox(); setupImplementationWalkthrough(); } );
+			$( "#interactivelink2" ).click( function(){ removeIntroBox(); setupPerceptionWalkthrough(); } );
 			fillControls();
 			generateVis();
 			fillVis();
@@ -89,6 +90,7 @@ function addHelp()
 		[ "#eventHelp",			"Opens a window to select the events to display data for.",									"left center",		"right center" ],
 		[ "#versionHelp",		"Select the version of the vis to display. Please change these based on the survey.",		"left center",		"right center" ],
 		[ "#helpIcon",			"Help will popup in these tooltips!",														"bottom center",	"top center" ],
+		[ "#helpIcon2",			"Help will popup in these tooltips!",														"bottom center",	"top center" ],
 		[ "#axisHelp",			"Select which x-axis to use.",																"left center",		"right center" ],
 		[ "#paletteHelp",		"Change the colore palette.",																"left center",		"right center" ]
 	];
@@ -421,32 +423,225 @@ function showEventsList()
 	$( "#eventlist" ).dialog( "open" );
 }
 
-var highlightIsActive = false;
+//var highlightIsActive = false;
 var $highlightedElement = $();
 
 // HIGHLIGHT HELPERS
 function activateHighlight( $element ) {
 	$highlightedElement = $element;
-	highlightIsActive = true;
+	//highlightIsActive = true;
 	$highlightedElement.addClass( "highlight" );
 }
 
 function deactivateHighlight() {
 	$highlightedElement.removeClass( "highlight" );
 	$highlightedElement = $();
-	highlightIsActive = false;
+	//highlightIsActive = false;
+}
+
+function closeWalkthrough()
+{
+	$( "#featurebox" ).css( "display", "none" );
+	$( "#featurenext" ).css( "display", "none" );
+}
+
+function setupPerceptionWalkthrough()
+{
+	$( "#walkthroughnext" ).click( function(){ interactivePerceptionWalkthrough(); } );
+	interactivePerceptionWalkthrough();
+}
+
+function setupImplementationWalkthrough()
+{
+	$( "#walkthroughnext" ).click( function(){ interactiveImplementationWalkthrough(); } );
+	interactiveImplementationWalkthrough();
 }
 
 var walkon = 0;
-function interactiveWalkthrough()
+function interactivePerceptionWalkthrough()
 {
+	$( "#featurebox" ).css( "display", "" );
+	$( "#featurenext" ).css( "display", "" ).css( "left", $( document ).width() - $( "#featurenext" ).width() - 30 ).css( "top", $( document ).height() - $( "#featurenext" ).height() - 30 );
 	deactivateHighlight();
 	
-	if( walkon == 0 )
-		activateHighlight( $( "#vis" ) );
+	if( walkon == 0 ) {
+		activateHighlight( $( "#countrypanel" ) );
+		$( "#featurebox" ).html( "Color Theory" );
+	}
 	
-	if( walkon == 1 )
-		activateHighlight( $( "hoverquery" ) );
+	if( walkon == 1 ) {
+		activateHighlight( $( "#vis" ) );
+		$( "#featurebox" ).html( "Color Theory" );
+	}
+	
+	if( walkon == 2 ) {
+		activateHighlight( $( "#controlpanel" ) );
+		$( "#featurebox" ).html( "Color Theory" );
+	}
+	
+	if( walkon == 3 ) {
+		//activateHighlight( $( "body" ) );
+		$( "#featurebox" ).html( "Gestalt's Principles - Enclosure" );
+	}
+	
+	if( walkon == 4 ) {
+		activateHighlight( $( "#controlpanel" ) );
+		$( "#featurebox" ).html( "Gestalt's Principles - Enclosure" );
+	}
+	
+	if( walkon == 5 ) {
+		activateHighlight( $( "#vis" ) );
+		$( "#featurebox" ).html( "Gestalt's Principles - Enclosure" );
+	}
+	
+	if( walkon == 6 ) {
+		activateHighlight( $( "#overview" ) );
+		$( "#featurebox" ).html( "Gestalt's Principles - Enclosure" );
+	}
+	
+	if( walkon == 7 ) {
+		//activateHighlight( $( "body" ) );
+		$( "#featurebox" ).html( "Maximum Space Utilization" );
+	}
+	
+	if( walkon == 8 ) {
+		activateHighlight( $( "#controlpanel" ) );
+		$( "#featurebox" ).html( "The Need for Hover Queries" );
+	}
+	
+	if( walkon == 9 ) {
+		activateHighlight( $( "#vis" ) );
+		$( "#featurebox" ).html( "Hover Queries" );
+	}
+	
+	if( walkon == 10 ) {
+		activateHighlight( $( "#center-root" ) );
+		$( "#featurebox" ).html( "Focus and Context" );
+	}
+	
+	if( walkon == 11 ) {
+		activateHighlight( $( "#vis" ) );
+		$( "#featurebox" ).html( "Focus..." );
+	}
+	
+	if( walkon == 12 ) {
+		activateHighlight( $( "#overview" ) );
+		$( "#featurebox" ).html( "...and Context" );
+	}
+	
+	if( walkon == 13 ) {
+		//activateHighlight( $( "body" ) );
+		$( "#featurebox" ).html( "Three Areas of Highlighting" );
+	}
+	
+	if( walkon == 14 ) {
+		//activateHighlight( $( "body" ) );
+		$( "#featurebox" ).html( "Highlighting - Control Panel" );
+	}
+	
+	if( walkon == 15 ) {
+		activateHighlight( $( "#vis" ) );
+		$( "#featurebox" ).html( "Highlighting - Context" );
+	}
+	
+	if( walkon == 16 ) {
+		activateHighlight( $( "#overview" ) );
+		$( "#featurebox" ).html( "Highlighting - Overview" );
+		
+		$( "#walkthroughnext" ).html( "DONE" );
+		$( "#walkthroughnext" ).click( function(){ closeWalkthrough(); } );
+	}
+	
+	walkon++;
+}
+
+function interactiveImplementationWalkthrough()
+{
+	$( "#featurebox" ).css( "display", "" );
+	$( "#featurenext" ).css( "display", "" ).css( "left", $( document ).width() - $( "#featurenext" ).width() - 30 ).css( "top", $( document ).height() - $( "#featurenext" ).height() - 30 );
+	deactivateHighlight();
+	
+	if( walkon == 0 ) {
+		//activateHighlight( $( "body" ) );
+		$( "#featurebox" ).html( "Implementation Overview" );
+	}
+	
+	if( walkon == 1 ) {
+		activateHighlight( $( "#controlpanel" ) );
+		$( "#featurebox" ).html( "Control Panel" );
+	}
+	
+	if( walkon == 2 ) {
+		activateHighlight( $( "#countrypanel" ) );
+		$( "#featurebox" ).html( "Country List" );
+	}
+	
+	if( walkon == 3 ) {
+		//activateHighlight( $( "body" ) );
+		$( "#featurebox" ).html( "Country List Demo" );
+	}
+	
+	if( walkon == 4 ) {
+		activateHighlight( $( "#viewpanel" ) );
+		$( "#featurebox" ).html( "View List" );
+	}
+	
+	if( walkon == 5 ) {
+		$( "#featurebox" ).html( "View List Demo" );
+	}
+	
+	if( walkon == 6 ) {
+		activateHighlight( $( "#filterspanel" ) );
+		$( "#featurebox" ).html( "Filters List" );
+	}
+	
+	if( walkon == 7 ) {
+		activateHighlight( $( "#yearfilterdiv" ) );
+		$( "#featurebox" ).html( "Year Filter" );
+	}
+	
+	if( walkon == 8 ) {
+		$( "#featurebox" ).html( "Year Filter Demo" );
+	}
+	
+	if( walkon == 9 ) {
+		activateHighlight( $( "#agefilterdiv" ) );
+		$( "#featurebox" ).html( "Age Filter" );
+	}
+	
+	if( walkon == 10 ) {
+		$( "#featurebox" ).html( "Age Filter Demo" );
+	}
+	
+	if( walkon == 11 ) {
+		activateHighlight( $( "#genderselectdiv" ) );
+		$( "#featurebox" ).html( "Gender Filter" );
+	}
+	
+	if( walkon == 12 ) {
+		$( "#featurebox" ).html( "Gender Filter Demo" );
+	}
+	
+	if( walkon == 13 ) {
+		activateHighlight( $( "#eventpanel" ) );
+		$( "#featurebox" ).html( "Events Filter" );
+	}
+	
+	if( walkon == 14 ) {
+		$( "#featurebox" ).html( "Event Filter Demo" );
+	}
+	
+	if( walkon == 15 ) {
+		activateHighlight( $( "#overview" ) );
+		$( "#featurebox" ).html( "Overview" );
+	}
+	
+	if( walkon == 16 ) {
+		$( "#featurebox" ).html( "Overview Demo" );
+		
+		$( "#walkthroughnext" ).html( "DONE" );
+		$( "#walkthroughnext" ).click( function(){ closeWalkthrough(); } );
+	}
 	
 	walkon++;
 }
