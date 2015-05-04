@@ -138,9 +138,11 @@ function updateHoverQuery( sel, da, graph )
 	else {
 		$( ".hqcountryname" ).html( countries[ d3.select( sel ).attr( "dataname" ) ] );
 		$( ".hqimg" ).css( "display", "" ).attr( "src", "css/images/flag_" + d3.select( sel ).attr( "dataname" ) + ".png" );
+		$( ".hqdata" ).css( "display", "" );
+		$( ".hqyear" ).css( "display", "" );
 	
 		if( type[0] == "E" ) {
-			$( ".hqdata" ).css( "display", "" ).html( "Missing data." );
+			$( ".hqdata" ).html( "Missing data." );
 			$( ".hqyear" ).css( "display", "" ).html( Math.round( graph["x"].invert( d3.mouse(sel)[0] ) ) );
 		}
 		else {
